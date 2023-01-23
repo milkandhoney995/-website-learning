@@ -1,0 +1,35 @@
+body {
+  margin: 0;
+}
+header {
+  position: fixed;
+  padding: 1rem 0;
+  width: 100%;
+  font-size: 2em;
+  text-align: center;
+  color: #fff;
+  background-color: #000;
+  transition: 0.3s;
+}
+main {
+  height: 2000px;
+  text-align: center;
+  background-color: #fff;
+  overflow: scroll;
+}
+div {
+  border: 1px solid black;
+  width: 100%;
+  height: 40vh;
+  overflow: scroll;
+}
+footer {
+  padding: 3em 0;
+  text-align: center;
+  color: #fff;
+  background-color: #000;
+}
+.is-animation {
+  padding: 2em 0;
+  font-size: 1em;
+}

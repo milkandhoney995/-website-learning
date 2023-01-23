@@ -1,0 +1,61 @@
+/* 参考：https://coco-factory.jp/ugokuweb/move02/6-4/ */
+
+* {
+  padding: 0;
+  margin: 0;
+}
+*,
+::before,
+::after {
+  background-repeat: no-repeat;
+  box-sizing: inherit;
+}
+
+#wrapper {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+}
+#fixed-area {
+  position: sticky;
+  top: 0;
+  width: 50%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: url(220313_001.jpg) no-repeat center;
+  background-size: cover;
+  color: #fff;
+}
+#container {
+  width: 50%;
+}
+.section {
+  min-height: 100vh;
+  padding: 30px;
+}
+.section:nth-of-type(2n) {
+  background: #fcecec;
+}
+.area__text {
+  margin-top: 2rem;
+}
+@media screen and (max-width: 768px) {
+  #wrapper {
+    display: block;
+  }
+  .section {
+    min-height: auto;
+  }
+
+  #fixed-area {
+    position: relative !important;
+    width: 100%;
+    height: 40vh;
+  }
+
+  #container {
+    width: 100%;
+  }
+}

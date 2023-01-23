@@ -1,0 +1,19 @@
+body {
+  background-color: azure;
+}
+.flex {
+  display: flex;
+  height: auto;
+}
+.flex-column {
+  flex-direction: column;
+}
+.flex_item {
+  width: 40%;
+  height: 50vh;
+  border: 5px solid #eee;
+  background-color: aquamarine;
+}
+.grow-2 {
+  flex-grow: 2;
+}

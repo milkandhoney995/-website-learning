@@ -1,0 +1,109 @@
+/* 参考：https://qiita.com/kura07/items/486c19045aab8090d6d9 */
+/* アイテムを自動的に配置 */
+/* コンテナの grid-auto-flowプロパティの初期値が row：普通は行方向から順にアイテムが埋まる*/
+.container {
+  display: grid;
+  grid-template-rows: 200px 100px;
+  grid-template-columns: 200px 100px 100px;
+  /* 列方向から順にアイテムが埋まる */
+  grid-auto-flow: column;
+}
+.itemA {
+  background-color: pink;
+}
+.itemB {
+  background-color: rgb(182, 248, 226);
+}
+.itemC {
+  background-color: rgb(203, 203, 253);
+}
+.itemD {
+  background-color: rgb(224, 198, 248);
+}
+.itemE {
+  background-color: rgb(248, 175, 175);
+}
+.itemF {
+  background-color: rgb(252, 252, 193);
+}
+.itemG {
+  background-color: rgb(193, 238, 252);
+}
+.itemH {
+  background-color: rgb(252, 210, 252);
+}
+
+/* 拡張したトラックの大きさを指定する */
+/* アイテムがgrid-template-rows / grid-template-columns で指定したよりも外側に来る場合 */
+.container1 {
+  display: grid;
+  grid-template-rows: 200px 100px;
+  grid-template-columns: 200px 100px 100px;
+  /* はみ出たアイテムの縦の高さを50pxにする。 */
+  grid-auto-rows: 50px;
+  /* はみ出たアイテムの縦の高さを 30px -> 50px -> 30px -> 50px ...と繰り返す */
+  grid-auto-rows: 30px 50px;
+}
+#itemH {
+  grid-row: 4;
+  grid-column: 2;
+}
+
+/* コンテナに grid-template-rows / grid-template-columns を指定していない場合 */
+.container2 {
+  display: grid;
+  grid-auto-rows: 70px;
+  grid-template-columns: 100px 100px 100px 100px;
+}
+/* 自動的に配置（span使用） */
+.container3 {
+  display: grid;
+  grid-template-rows: 100px 100px;
+  grid-template-columns: 100px 100px 100px;
+}
+#itemB {
+  /* 行方向に2セルを占有する。どこに配置するかは自動的に決まる。 */
+  grid-row: span 2;
+}
+#itemB-1 {
+  grid-row: 1;
+  grid-column: 1;
+}
+#itemD {
+  grid-row: 2;
+  grid-column: 2;
+}
+/*dense  */
+.container4 {
+  display: grid;
+  grid-template-rows: 100px 100px 100px 100px;
+  grid-template-columns: 100px 100px 100px;
+  grid-auto-flow: dense;
+}
+#itemB-2 {
+  grid-row: span 2;
+  grid-column: span 2;
+}
+#itemC {
+  grid-row: span 2;
+  grid-column: span 2;
+}
+/* トラックの大きさの指定を繰り返したい */
+.container_repeat {
+  display: grid;
+  grid-template-rows: repeat(2, 100px 50px);
+  grid-template-columns: repeat(5, 100px);
+}
+/* コンテナの大きさに合わせて繰り返す (repeat(auto-fill | auto-fit, ...)) */
+.container_repeat_auto-fill {
+  display: grid;
+  grid-template-rows: 100px;
+  grid-template-columns: repeat(auto-fill, 100px);
+  justify-content: center;
+}
+.container_repeat_auto-fit {
+  display: grid;
+  grid-template-rows: 100px;
+  grid-template-columns: repeat(auto-fit, 100px);
+  justify-content: center;
+}

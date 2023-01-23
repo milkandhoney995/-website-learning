@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <header id="header">ヘッダー</header>
+    <main id="main">
+      <div id="sentence">
+        In my younger and more vulnerable years my father gave me some advice
+        that I've been turning over in my mind ever since. <br /><br />
+        'Whenever you feel like criticizing anyone,' he told me, just remember
+        that all the people in this world haven't had the advantages that you've
+        had.' In my younger and more vulnerable years my father gave me some
+        advice that I've been turning over in my mind ever since. <br /><br />
+        'Whenever you feel like criticizing anyone,' he told me, just remember
+        that all the people in this world haven't had the advantages that you've
+        had.' In my younger and more vulnerable years my father gave me some
+        advice that I've been turning over in my mind ever since. <br /><br />
+        'Whenever you feel like criticizing anyone,' he told me, just remember
+        that all the people in this world haven't had the advantages that you've
+        had.' In my younger and more vulnerable years my father gave me some
+        advice that I've been turning over in my mind ever since. <br /><br />
+        'Whenever you feel like criticizing anyone,' he told me, just remember
+        that all the people in this world haven't had the advantages that you've
+        had.' In my younger and more vulnerable years my father gave me some
+        advice that I've been turning over in my mind ever since. <br /><br />
+        'Whenever you feel like criticizing anyone,' he told me, just remember
+        that all the people in this world haven't had the advantages that you've
+        had.' In my younger and more vulnerable years my father gave me some
+        advice that I've been turning over in my mind ever since. <br /><br />
+        'Whenever you feel like criticizing anyone,' he told me, just remember
+        that all the people in this world haven't had the advantages that you've
+        had.' In my younger and more vulnerable years my father gave me some
+        advice that I've been turning over in my mind ever since. <br /><br />
+        'Whenever you feel like criticizing anyone,' he told me, just remember
+        that all the people in this world haven't had the advantages that you've
+        had.' In my younger and more vulnerable years my father gave me some
+        advice that I've been turning over in my mind ever since. <br /><br />
+        'Whenever you feel like criticizing anyone,' he told me, just remember
+        that all the people in this world haven't had the advantages that you've
+        had.' In my younger and more vulnerable years my father gave me some
+        advice that I've been turning over in my mind ever since. <br /><br />
+        'Whenever you feel like criticizing anyone,' he told me, just remember
+        that all the people in this world haven't had the advantages that you've
+        had.'
+      </div>
+      <p id="demo"></p>
+      <button id="button">ボタン</button>
+    </main>
+    <footer>フッター</footer>
+    <script>
+      // ボタンクリック
+      const button = document.getElementById("button");
+      button.addEventListener("click", function () {
+        document.getElementById("demo").innerHTML = "Hello World";
+        console.log("hello");
+      });
+
+      //   スクロール
+      const sentence = document.getElementById("sentence");
+      const header = document.getElementById("header");
+
+      sentence.addEventListener("scroll", myFunction);
+
+      function myFunction() {
+        const scrollPosition = sentence.scrollTop;
+        if (scrollPosition > 100) {
+          header.classList.add("is-animation");
+        } else {
+          header.classList.remove("is-animation");
+        }
+      }
+    </script>
+  </body>
+</html>

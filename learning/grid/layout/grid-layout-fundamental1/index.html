@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta
+      name="viewport"
+      content="wclassth=device-wclassth, initial-scale=1.0"
+    />
+    <title>Document</title>
+    <link rel="stylesheet" href="index.css" />
+  </head>
+  <body>
+    <h1 class="">アイテムを自動的に配置</h1>
+    <div class="container">
+      <div class="itemA">A</div>
+      <div class="itemB">B</div>
+      <div class="itemC">C</div>
+      <div class="itemD">D</div>
+      <div class="itemE">E</div>
+      <div class="itemF">F</div>
+    </div>
+    <h2 class="">拡張したトラックの大きさを指定する</h2>
+    <div class="">
+      グリッドのトラックの大きさの指定は grid-template-rows /
+      grid-template-columns で定義出来ますが、<br />場合によってはアイテムがこれらのプロパティで指定したよりも外側に来ることがあります。
+      <br /><br />
+      ・アイテムに grid-row / grid-column
+      を指定して、わざと外側のエリアを指定した場合<br />
+      ・アイテムに grid-row / grid-column
+      を指定しないが、アイテム多すぎてが定義したグリッドよりもはみ出る場合<br />
+      ・そもそもコンテナに grid-template-rows / grid-template-columns
+      を指定していない場合
+    </div>
+    <div style="margin-top: 2rem">
+      この場合、
+      <h3>grid-auto-rows / grid-auto-columns</h3>
+      をコンテナに指定し、<br />
+      その場合のトラックの大きさを指定する。<br /><br />
+      ・grid-auto-rows: はみ出たアイテムの行トラックの大きさを指定する<br />
+      ・grid-auto-columns: はみ出たアイテムの列トラックの大きさを指定する
+    </div>
+    <div class="container1">
+      <div class="itemA">A</div>
+      <div class="itemB">B</div>
+      <div class="itemC">C</div>
+      <div class="itemD">D</div>
+      <div class="itemE">E</div>
+      <div class="itemF">F</div>
+      <div class="itemG">G</div>
+      <div class="itemH" id="itemH">H</div>
+    </div>
+    <h3>
+      コンテナに grid-template-rows / grid-template-columns を指定していない場合
+    </h3>
+    <div class="">
+      全てのグリッドが grid-auto-rows / grid-auto-columns の大きさになる。
+    </div>
+    <div class="container2">
+      <div class="itemA">A</div>
+      <div class="itemB">B</div>
+      <div class="itemC">C</div>
+      <div class="itemD">D</div>
+      <div class="itemE">E</div>
+      <div class="itemF">F</div>
+      <div class="itemG">G</div>
+    </div>
+    <h2>自動的に配置（span使用）</h2>
+    <div class="">
+      grid-row / grid-column でラインの番号を指定する代わりに、<br />隣接するセルをいくつ跨いで占有するかだけを指定する
+    </div>
+    <div class="container3">
+      <div class="itemA">A</div>
+      <div class="itemB" id="itemB">B</div>
+      <div class="itemC">C</div>
+      <div class="itemD">D</div>
+      <div class="itemE">E</div>
+    </div>
+    <h2>固定の配置と自動的な配置を混ぜる</h2>
+    <div class="">
+      grid-row / grid-column / grid-area
+      を使った固定の配置と、自動的な配置を混ぜる場合、<br />
+      固定配置のアイテムが先に配置され、<br />その後に左上から空いたスペースに自動的な配置のアイテムが配置されていく。
+    </div>
+    <div class="container3">
+      <div class="itemA">A</div>
+      <div class="itemB" id="itemB-1">B（固定）</div>
+      <div class="itemC">C</div>
+      <div class="itemD" id="itemD">D（固定）</div>
+      <div class="itemE">E</div>
+      <div class="itemF">F</div>
+    </div>
+    <h2>denseでなるべく敷き詰める (grid-auto-flow)</h2>
+    <div class="">
+      自動的な配置の方法は左上から順にアイテムが埋まっていくが、<br />場合によってはスペースが空いてしまう。
+      <br /><br />
+      grid-auto-flow: dense; を指定することで、
+      <br />開いているスペースをなるべく埋めるという指定にすることが出来る。
+      <div class="container4">
+        <div class="itemA">A</div>
+        <div class="itemB" id="itemB-2">B</div>
+        <div class="itemC" id="itemC">C</div>
+        <div class="itemD">D</div>
+        <div class="itemE">E</div>
+        <div class="itemF">F</div>
+      </div>
+    </div>
+    <h1 class="">トラックの大きさの指定を繰り返したい</h1>
+    <div class="">繰り返しの部分は repeat(繰り返す回数, トラックの幅)</div>
+    <div class="container_repeat">
+      <div class="itemA">A</div>
+      <div class="itemB">B</div>
+      <div class="itemC">C</div>
+      <div class="itemD">D</div>
+      <div class="itemE">E</div>
+      <div class="itemF">F</div>
+      <div class="itemG">G</div>
+      <div class="itemH">H</div>
+    </div>
+    <h2>
+      コンテナの大きさに合わせて繰り返す (repeat(auto-fill | auto-fit, ...))
+    </h2>
+    <div class="">例：100px のトラックを、横に詰めれるだけ詰めたい</div>
+    <h3>auto-fill：中央によらない</h3>
+    <div class="">アイテムが配置されないトラックの幅も確保してしまうため</div>
+    <div class="container_repeat_auto-fill">
+      <div class="itemA">A</div>
+      <div class="itemB">B</div>
+      <div class="itemC">C</div>
+      <div class="itemD">D</div>
+      <div class="itemE">E</div>
+      <div class="itemF">F</div>
+      <div class="itemG">G</div>
+    </div>
+    <h3>auto-fit：アイテムが配置されなかったトラックは無くなる</h3>
+    <div class="container_repeat_auto-fit">
+      <div class="itemA">A</div>
+      <div class="itemB">B</div>
+      <div class="itemC">C</div>
+      <div class="itemD">D</div>
+      <div class="itemE">E</div>
+      <div class="itemF">F</div>
+      <div class="itemG">G</div>
+    </div>
+  </body>
+</html>

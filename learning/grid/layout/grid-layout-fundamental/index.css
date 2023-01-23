@@ -1,0 +1,61 @@
+/* 基礎編：https://qiita.com/kura07/items/e633b35e33e43240d363 */
+.container {
+  display: grid; /* グリッドレイアウト */
+
+  /* ②CSS で各トラックの大きさを指定する
+    grid-template-rows: 行のトラックの高さを半角スペースで区切って指定
+    grid-template-columns: 列のトラックの幅を半角スペースで区切って指定 */
+  grid-template-rows: 100px 50px; /* 1行目は100px、2行目は50px */
+  grid-template-columns: 150px 1fr; /* 1列目は150px、2列目は残り全部 */
+}
+
+/* ③アイテムの配置を指定する
+③-1 ラインの番号で指定する
+③-2 エリアに名前を付けて指定する */
+
+/* ③-1 ラインの番号で指定する
+grid-row: アイテムが占める行のラインの番号をスラッシュ区切りで指定する
+grid-column: アイテムが占める列のラインの番号をスラッシュ区切りで指定する */
+#itemA {
+  background: pink;
+  /* いくつ先のラインまで伸ばすかを記述する */
+  grid-row: 1 / span 2; /* ライン番号1から始めて、2つ先のラインまで伸ばす */
+  grid-column: 1; /* これと同じ grid-row: 1 / 2; */
+}
+/* 2行分伸ばしたい時 */
+#itemB {
+  background: rgb(200, 205, 247);
+  grid-row: 1/2;
+  grid-column: 2;
+}
+#itemC {
+  grid-row: 2;
+  grid-column: 2;
+  background: rgb(235, 245, 199);
+}
+/* ③-2 エリアに名前を付けて指定する
+    grid-template-areas: エリアを作ってそれぞれに名前を付ける（コンテナのスタイル）
+    grid-area: 各アイテム が占めるエリアの名前を指定する（アイテムのスタイル）
+*/
+.container1 {
+  display: grid;
+  grid-template-rows: 100px 50px;
+  grid-template-columns: 150px 1fr;
+  /* ダブルクオーテーション（"）で囲まれた1行の文字列が、グリッドの1行になる */
+  /* 同じエリアの名前を指定することで、エリアが複数のセルにまたがることを表す */
+  /* 名前を付ける必要のないセルにはピリオド（.）を一つ以上連続して記述する */
+  grid-template-areas: "areaD areaE" "areaD areaF";
+}
+#itemD {
+  background: pink;
+  grid-area: areaD;
+}
+/* 2行分伸ばしたい時 */
+#itemE {
+  background: rgb(200, 205, 247);
+  grid-area: areaE;
+}
+#itemF {
+  background: rgb(235, 245, 199);
+  grid-area: areaF;
+}
