@@ -8,6 +8,8 @@ npm run dev
 
 
 ### 環境
+React 18.2.0
+
 Next.js 13.1.6
 
 Node 18.14.0
@@ -17,3 +19,6 @@ Node 18.14.0
 
 ### ギャラリー
 [LightGallery](https://www.lightgalleryjs.com/demos/thumbnails/)で実装
+
+### フォルダ
+- Layouts: ヘッダーやナビゲーションなど共通のコンポーネントを格納
