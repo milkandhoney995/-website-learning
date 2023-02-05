@@ -3,15 +3,15 @@ import Header from "./header/header";
 import Navigation from "./navigation/navigation";
 import { useState } from "react";
 
-export default function Layout({
-  children,
-}: {
+type Props = {
   children: React.ReactNode;
-}) {
+}
+
+export default function Layout({ children, ...props }: Props) {
   const [menuOpen, setMenuOpen] = useState(false);
   return(
     <Fragment>
-      <div>{children}</div>
+      <div {...props}>{children}</div>
       <Navigation setShowMenu={menuOpen}></Navigation>
       <Header setMenuOpen={setMenuOpen}></Header>
     </Fragment>
