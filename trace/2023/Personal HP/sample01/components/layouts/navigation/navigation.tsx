@@ -1,9 +1,10 @@
 import classes from "./navigation.module.scss";
 import Link from "next/link";
+import { useState } from "react";
 
-export default function Navigation() {
+export default function Navigation(props) {
   return(
-    <nav className={classes.nav}>
+    <nav className={`${classes.nav} ${props.setShowMenu ? `${classes.nav__activeNav}` : ""}`}>
       <div className={classes.nav__content}>
         <ul className={classes.nav__menu}>
           <li>

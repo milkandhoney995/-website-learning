@@ -12,8 +12,8 @@ function Layout({
   return(
     <Fragment>
       <div>{children}</div>
+      <Navigation setShowMenu={menuOpen}></Navigation>
       <Header setMenuOpen={setMenuOpen}></Header>
-      <Navigation></Navigation>
     </Fragment>
   )
 }

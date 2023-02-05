@@ -4,7 +4,7 @@ import profileImg from "public/images/header_mark01.svg"
 import classes from "./header.module.scss";
 import { useState } from "react";
 
-export default function Header(props: boolean) {
+export default function Header(props) {
   const [navOpen, setNavOpen] = useState(false);
   const toggleNav = () => {
     setNavOpen(!navOpen);
