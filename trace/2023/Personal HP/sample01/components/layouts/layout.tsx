@@ -3,7 +3,7 @@ import Header from "./header/header";
 import Navigation from "./navigation/navigation";
 import { useState } from "react";
 
-function Layout({
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;
@@ -17,4 +17,3 @@ function Layout({
     </Fragment>
   )
 }
-export default Layout;
