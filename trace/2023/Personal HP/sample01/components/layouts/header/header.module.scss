@@ -27,8 +27,45 @@
     opacity: 0.8;
 }
 
+.menuButton {
+  display: block;
+  width: 5rem;
+  height: 5rem;
+  &__item {
+    display: block;
+    position: absolute;
+    left: 1.375rem;
+    width: 2.25rem;
+    height: 0.125rem;
+    background: #000;
+    transition: all 0.5s;
+    -webkit-transition: all 0.5s;
+    -moz-transition: all 0.5s;
+  }
+  &__item:first-child {
+    top: 1.75rem;
+    background: #000;
+  }
+  &__item:nth-child(2) {
+    margin-top: -0.063rem;
+    top: 50%;
+  }
+  &__item:last-child {
+    bottom: 1.75rem;
+  }
+}
 @media (min-width: 768px) {
     .header ul {
         gap: 0.5rem;
+    }
+}
+@media (min-width: 801px) {
+    .menuButton {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        margin: auto;
     }
 }

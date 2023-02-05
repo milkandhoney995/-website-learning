@@ -19,11 +19,11 @@ export default function Header() {
       <div>
         <span></span>
       </div>
-      <a href="">
-        <span></span>
-        <span></span>
-        <span></span>
-      </a>
+      <Link className={classes.menuButton} href="">
+        <span className={classes.menuButton__item}></span>
+        <span className={classes.menuButton__item}></span>
+        <span className={classes.menuButton__item}></span>
+      </Link>
     </header>
   )
 }
