@@ -18,8 +18,8 @@
     margin: auto;
     text-align: center;
     font-family: 'Roboto Condensed', sans-serif;
-    width: 25rem;
-    height: 25rem;
+    width: 40rem;
+    height: 40rem;
   }
   &__content::before {
     display: block;
@@ -27,29 +27,32 @@
     position: absolute;
     top: 0;
     left: 50%;
-    margin-left: -7.5rem;
-    width: 15rem;
-    height: 0.125rem;
+    margin-left: -12rem;
+    width: 24rem;
+    height: 0.2rem;
     background: #000;
   }
   &__menu {
-    padding: 3.125rem 0;
+    padding: 5rem 0;
     list-style: none;
   }
   &__menu li a {
     display: block;
-    padding: 0.625rem 0;
+    padding: 1rem 0;
     font-size: 5rem;
     color: #000;
   }
+  &__copyright {
+    font-size: 1rem;
+  }
   @media (max-width: 800px) {
     &__content {
-      width: 18.75rem;
-      height: 18.75rem;
+      width: 30rem;
+      height: 30rem;
     }
     &__content::before {
-      margin-left: -6.25rem;
-      width: 12.5rem;
+      margin-left: -10rem;
+      width: 20rem;
     }
     &__menu li a {
       font-size: 3rem;

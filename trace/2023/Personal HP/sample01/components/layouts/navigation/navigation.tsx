@@ -9,8 +9,17 @@ export default function Navigation() {
           <li>
             <Link href={`/profile`}>PROFILE</Link>
           </li>
+          <li>
+            <Link href={`/`}>NEW WORKS</Link>
+          </li>
+          <li>
+            <Link href={`/`}>WORKS</Link>
+          </li>
+          <li>
+            <Link href={`/`}>GALLERY</Link>
+          </li>
         </ul>
-        <p className=""></p>
+        <p className={classes.nav__copyright}>© YUHKO KAIDA</p>
       </div>
     </nav>
   )
