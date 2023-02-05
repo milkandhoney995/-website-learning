@@ -56,8 +56,8 @@
     bottom: 2.8rem;
   }
 }
-.menuButton.active .menuButton__item:first-child,
-.menuButton.active .menuButton__item:last-child {
+.active span:first-child,
+.active span:last-child {
     opacity: 0;
 }
 @media (min-width: 801px) {

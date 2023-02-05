@@ -4,13 +4,13 @@ import profileImg from "public/images/header_mark01.svg"
 import classes from "./header.module.scss";
 import { useState } from "react";
 
-export default function Header() {
+export default function Header(props: boolean) {
   const [navOpen, setNavOpen] = useState(false);
   const toggleNav = () => {
     setNavOpen(!navOpen);
-};
+  };
+  props.setMenuOpen(navOpen)
   return(
-    <>
     <header className={classes.header}>
       <h1 className={classes.header__mark}>
         <Link
@@ -30,19 +30,11 @@ export default function Header() {
           KAIDA
         </span>
       </div>
-      <Link className={classes.menuButton} href="" onClick={toggleNav}>
+      <Link className={`${classes.menuButton} ${navOpen ? `${classes.active}` : ""}`} href="" onClick={toggleNav}>
+        <span className={classes.menuButton__item} onClick={toggleNav}></span>
         <span className={classes.menuButton__item}></span>
-        <span className={classes.menuButton__item}></span>
-        <span className={classes.menuButton__item}></span>
+        <span className={classes.menuButton__item} onClick={toggleNav}></span>
       </Link>
     </header>
-    <style jsx>
-      {`
-        .menuButton__item:first-child, .menuButton__item:last-child {
-          opacity: ${navOpen ? "0" : "1"}
-        }
-      `}
-    </style>
-    </>
   )
 }
