@@ -8,13 +8,13 @@ type Props = {
 }
 
 export default function Layout({ children, ...props }: Props) {
-  const [menuOpen, setMenuOpen] = useState(false);
+  const [navOpen, setNavOpen] = useState(false);
 
   return(
     <Fragment>
       <div {...props}>{children}</div>
-      <Navigation showMenu={menuOpen}></Navigation>
-      <Header openMenu={setMenuOpen}></Header>
+      <Navigation showMenu={navOpen}></Navigation>
+      <Header openMenu={setNavOpen}></Header>
     </Fragment>
   )
 }
