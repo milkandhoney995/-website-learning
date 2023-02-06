@@ -9,7 +9,7 @@ export default function Header(props) {
   const toggleNav = () => {
     setNavOpen(!navOpen);
   };
-  props.setMenuOpen(navOpen)
+  props.openMenu(navOpen)
   return(
     <header className={classes.header}>
       <h1 className={classes.header__mark}>
@@ -31,9 +31,9 @@ export default function Header(props) {
         </span>
       </div>
       <Link className={`${classes.menuButton} ${navOpen ? `${classes.active}` : ""}`} href="" onClick={toggleNav}>
-        <span className={classes.menuButton__item} onClick={toggleNav}></span>
         <span className={classes.menuButton__item}></span>
-        <span className={classes.menuButton__item} onClick={toggleNav}></span>
+        <span className={classes.menuButton__item}></span>
+        <span className={classes.menuButton__item}></span>
       </Link>
     </header>
   )
