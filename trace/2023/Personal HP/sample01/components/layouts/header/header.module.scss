@@ -8,10 +8,10 @@
   left: 0;
   &__mark {
     width: 8rem;
-    background: url(../../../public/images/header_mark02.svg);
+    background-image: url('/images/header_mark02.svg');
     background-size: cover;
   }
-  &__mark:hover {
+  &__mark > a:hover {
     opacity: 0;
   }
   &__name {
