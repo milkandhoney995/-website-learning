@@ -1,3 +1,6 @@
+// Import Swiper styles
+import 'swiper/scss';
+import "swiper/css/effect-fade";
 import '@/styles/globals.scss'
 import 'modern-css-reset/dist/reset.min.css'
 import type { AppProps } from 'next/app'
