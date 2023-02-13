@@ -1,15 +1,13 @@
 import Head from "next/head";
 import Image from "next/image";
 import { Fragment } from "react";
-import { Title, SubTitle, Works } from '../../components/index'
+import { Title, SubTitle, Works, Background } from '../../components/index'
 
 export default function New() {
   return(
     <Fragment>
       <article>
-        <div className="backImage backImage__img01">
-          <span></span>
-        </div>
+        <Background imageUrl={"'/images/back01.jpg'"}></Background>
         <div className="contents">
           <div className="works__wrapper">
             <Title title={'NEW WORKS'}></Title>
