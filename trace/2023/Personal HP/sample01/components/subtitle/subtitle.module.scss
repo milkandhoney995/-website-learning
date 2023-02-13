@@ -1,0 +1,8 @@
+.subtitle {
+  font-size: 3rem;
+  padding: 2rem 0 5rem 0;
+  @media (max-width: 800px) {
+    font-size: 2rem;
+    border-top: solid 0.1rem #a89167;
+  }
+}

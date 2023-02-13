@@ -1,2 +1,5 @@
 export {default as Header} from './layouts/header/header'
 export {default as Navigation} from './layouts/navigation/navigation'
+export {default as Title} from './title/title'
+export {default as SubTitle} from './subtitle/subtitle'
+export {default as Works} from './works/works'

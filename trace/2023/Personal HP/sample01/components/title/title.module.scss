@@ -1,0 +1,18 @@
+.title {
+  font-size: 8rem;
+  padding: 0 0 5rem 0;
+  &--sm {
+    font-size: 3rem;
+    padding: 2rem 0 5rem 0;
+  }
+}
+
+@media (max-width: 800px) {
+  .title {
+    font-size: 6rem;
+  }
+  .title--sm {
+    font-size: 2rem;
+    border-top: solid 0.1rem #a89167;
+  }
+}
