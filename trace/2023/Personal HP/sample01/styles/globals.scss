@@ -112,36 +112,12 @@ body, h1, h2, h3, h4 {
   font-weight: normal;
 }
 
-.backImage {
-  width: 100%;
-  height: 100vh;
-  position: fixed;
-  top: 0;
-  left: 0;
-  animation-duration: 3s;
-  animation-name: back_image;
-  &__img01 {
-    background: url('/images/back01.jpg') no-repeat center right;
-    background-size: cover;
-  }
-  & > span {
-    display: block;
-    width: 100%;
-    height: 100vh;
-    opacity: 0.2;
-    background: #000;
-  }
-}
-// reloadした時に徐々にimageが表示される
-@keyframes back_image {
- 0% { opacity: 0;}
- 50% { opacity: 1;}
- 100% { opacity: 1;}
-}
-
 .contents {
   position: relative;
   padding: 2rem 2rem 2rem 10rem;
+  @media (max-width: 800px) {
+    padding: 8rem 0 0 0;
+  }
 }
 .works__wrapper {
   padding: 2rem 2rem 22rem 10rem;
@@ -150,14 +126,6 @@ body, h1, h2, h3, h4 {
   }
   @media (max-width: 800px) {
     padding: 4rem 2rem 2rem 2rem;
-  }
-}
-@media (max-width: 800px) {
-  .contents {
-    padding: 8rem 0 0 0;
-  }
-  .backImage {
-    background: #eeeee7;
   }
 }
 

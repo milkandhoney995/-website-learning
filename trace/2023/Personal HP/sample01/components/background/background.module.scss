@@ -15,3 +15,16 @@
     background: #000;
   }
 }
+
+// reloadした時に徐々にimageが表示される
+@keyframes back_image {
+  0% { opacity: 0;}
+  50% { opacity: 1;}
+  100% { opacity: 1;}
+}
+
+@media (max-width: 800px) {
+  .backImage {
+    background: #eeeee7;
+  }
+}
