@@ -2,11 +2,13 @@ import Head from "next/head";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment } from "react";
+import { Title } from '../../components/index'
+
 
 export default function Home() {
   return(
     <Fragment>
-      PROFILE
+      <Title title={'PROFILE'}></Title>
     </Fragment>
   )
 }
