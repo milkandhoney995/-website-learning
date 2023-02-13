@@ -1,6 +1,5 @@
 import { Fragment } from "react";
-import Header from "./header/header";
-import Navigation from "./navigation/navigation";
+import { Header, Navigation }from "../index";
 import { useState } from "react";
 
 type Props = {
