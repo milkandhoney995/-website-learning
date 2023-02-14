@@ -5,11 +5,6 @@ import classes from "./header.module.scss";
 import { useState } from "react";
 
 export default function Header(props) {
-  const [navOpen, setNavOpen] = useState(false);
-  const toggleNav = () => {
-    setNavOpen(!navOpen);
-  };
-  props.openMenu(navOpen)
   return(
     <header className={classes.header}>
       <h1 className={classes.header__mark}>
@@ -30,7 +25,7 @@ export default function Header(props) {
           KAIDA
         </span>
       </div>
-      <Link className={`${classes.menuButton} ${navOpen ? `${classes.active}` : ""}`} href="" onClick={toggleNav}>
+      <Link className={`${classes.menuButton} ${props.openMenu ? `${classes.active}` : ""}`} href="" onClick={props.onClick}>
         <span className={classes.menuButton__item}></span>
         <span className={classes.menuButton__item}></span>
         <span className={classes.menuButton__item}></span>

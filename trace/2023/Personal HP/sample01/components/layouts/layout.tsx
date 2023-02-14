@@ -8,12 +8,21 @@ type Props = {
 
 export default function Layout({ children, ...props }: Props) {
   const [navOpen, setNavOpen] = useState(false);
+  const toggleNav = () => {
+    setNavOpen(!navOpen);
+  };
+  const menuList = [
+    { id: 1, href: "/profile", title: "PROFILE" },
+    { id: 2, href: "/new", title: "NEW WORKS" },
+    { id: 3, href: "/works", title: "WORKS" },
+    { id: 4, href: "/gallery", title: "GALLERY" },
+  ];
 
   return(
     <Fragment>
       <div {...props}>{children}</div>
-      <Navigation showMenu={navOpen}></Navigation>
-      <Header openMenu={setNavOpen}></Header>
+      <Navigation menus={menuList} showMenu={navOpen} onClick={toggleNav}></Navigation>
+      <Header openMenu={navOpen} onClick={toggleNav}></Header>
     </Fragment>
   )
 }
