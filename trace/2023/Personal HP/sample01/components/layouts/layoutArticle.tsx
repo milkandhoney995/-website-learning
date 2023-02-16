@@ -6,7 +6,7 @@ type Props = {
   children: React.ReactNode;
 }
 
-export default function Layout({ children, ...props }: Props) {
+export default function LayoutArticle({ children, ...props }: Props) {
   const [navOpen, setNavOpen] = useState(false);
   const toggleNav = () => {
     setNavOpen(!navOpen);
@@ -14,7 +14,9 @@ export default function Layout({ children, ...props }: Props) {
 
   return(
     <Fragment>
-      <div {...props}>{children}</div>
+      <Article imageUrl={"'/images/back01.jpg'"} {...props}>
+        {children}
+      </Article>
       <Navigation showMenu={navOpen} onClick={toggleNav}></Navigation>
       <Header openMenu={navOpen} onClick={toggleNav}></Header>
     </Fragment>

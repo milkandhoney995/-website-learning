@@ -20,3 +20,11 @@ export default function New() {
     </Fragment>
   )
 }
+
+export async function getStaticProps() {
+  return {
+      props: {
+          layout: "article",
+      },
+  };
+}

@@ -12,3 +12,11 @@ export default function Home() {
     </Fragment>
   )
 }
+
+export async function getStaticProps() {
+  return {
+      props: {
+          layout: "article",
+      },
+  };
+}

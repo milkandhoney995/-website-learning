@@ -1,3 +1,5 @@
+export {default as ArticleLayout} from './layouts/layoutArticle'
+export {default as Layout} from './layouts/layout'
 export {default as Header} from './layouts/header/header'
 export {default as Navigation} from './layouts/navigation/navigation'
 export {default as Article} from './layouts/article/article'
