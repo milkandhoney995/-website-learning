@@ -1,0 +1,7 @@
+.contents {
+  position: relative;
+  padding: 2rem 2rem 2rem 10rem;
+  @media (max-width: 800px) {
+    padding: 8rem 0 0 0;
+  }
+}
