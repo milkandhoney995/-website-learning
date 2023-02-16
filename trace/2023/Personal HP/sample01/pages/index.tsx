@@ -19,6 +19,7 @@ export async function getStaticProps() {
   return {
       props: {
           layout: "home",
+          title: "home"
       },
   };
 }

@@ -25,6 +25,7 @@ export async function getStaticProps() {
   return {
       props: {
           layout: "article",
+          title: "new",
           imgUrl: "'/images/back01.jpg'"
       },
   };
