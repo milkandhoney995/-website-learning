@@ -8,7 +8,7 @@ export default function Header(props) {
     <header className={classes.header}>
       <h1 className={classes.header__mark}>
         <Link
-          href={`/profile`}
+          href={`/`}
         >
           <Image
             src={profileImg}
