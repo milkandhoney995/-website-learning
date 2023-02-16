@@ -2,7 +2,6 @@ import Image from 'next/image'
 import Link from "next/link";
 import profileImg from "public/images/header_mark01.svg"
 import classes from "./header.module.scss";
-import { useState } from "react";
 
 export default function Header(props) {
   return(

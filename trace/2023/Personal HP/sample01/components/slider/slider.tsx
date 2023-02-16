@@ -1,7 +1,6 @@
 import Image from 'next/image'
 import Link from "next/link";
 import classes from "./slider.module.scss";
-import { useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, EffectFade } from "swiper";
 // Import Swiper styles

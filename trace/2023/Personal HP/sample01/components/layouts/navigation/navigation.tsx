@@ -1,6 +1,5 @@
 import classes from "./navigation.module.scss";
 import Link from "next/link";
-import { useState } from "react";
 
 export default function Navigation(props) {
   return(
