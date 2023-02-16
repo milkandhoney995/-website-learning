@@ -1,6 +1,4 @@
-import Head from "next/head";
 import Image from "next/image";
-import Link from "next/link";
 import { Fragment } from "react";
 import { Title } from '../../components/index'
 
@@ -17,6 +15,7 @@ export async function getStaticProps() {
   return {
       props: {
           layout: "article",
+          imgUrl: "'/images/back02.jpg'"
       },
   };
 }

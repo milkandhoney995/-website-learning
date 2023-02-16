@@ -17,7 +17,7 @@ export default function App({ Component, pageProps }: AppProps) {
     }
     case "article": {
       return (
-        <ArticleLayout>
+        <ArticleLayout imageUrl={pageProps.imgUrl}>
           <Component {...pageProps} />
         </ArticleLayout>
       )
