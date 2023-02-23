@@ -9,6 +9,7 @@ import { logMessage, isUserSignedIn, isUserSignedIn2, sumProductPrice } from './
 import { objectSample, typeAliasSample } from "./object/index";
 import { ArraySmaple, TupleSample } from "./array/index";
 import { GenericsBasicSample, GenericsAdvancedSample } from "./generics/index";
+import { CallbackSample, PromiseSample, AsyncAwaitSample } from "./asynchronous/index";
 const inter = Inter({ subsets: ['latin'] })
 
 export default function Home() {
@@ -34,6 +35,9 @@ export default function Home() {
   const tuple = TupleSample()
   const basicGeneritics = GenericsBasicSample()
   const advancedGenerics = GenericsAdvancedSample()
+  // CallbackSample()
+  // PromiseSample()
+  AsyncAwaitSample()
   return (
     <main className={styles.main}>
       <div>
