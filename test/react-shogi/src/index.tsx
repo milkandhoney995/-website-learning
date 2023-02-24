@@ -35,26 +35,23 @@ class Board extends React.Component<BoardPropsInterface, BoardStateInterface> {
         onClick={() => this.props.onClick(i)}/>
     )
   }
+  Content(i: number) {
+    let content = []
+    for (let j = i; j < i+3; j++) {
+      content.push(this.renderSquare(j))
+    }
+    return content
+  }
 
   render() {
+    let items = []
+    for (let i = 0; i < 9; i=i+3) {
+      items.push(<div className="board-row" key={i}>{this.Content(i)}</div>)
+    }
 
     return (
       <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
+        {items}
       </div>
     );
   }
