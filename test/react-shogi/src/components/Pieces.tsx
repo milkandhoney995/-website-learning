@@ -1,5 +1,5 @@
 type Suji = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 // 横
-type Dan = '1' | '2' | '3' | '4' | '5' | '6' | '7' | '8' | '9' // 縦
+type Dan = 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 // 縦
 type Player = 'first' | 'second'
 
 // 駒の位置
@@ -14,13 +14,13 @@ class Position {
     if (player === 'first') {
       return {
         suji: Math.abs(position.suji - this.suji),
-        dan: Math.abs(Number(position.dan) - Number(this.dan))
+        dan: Math.abs(position.dan - this.dan)
       }
     } else {
       // 段(縦の位置)は、正負反転
       return {
         suji: Math.abs(position.suji - this.suji),
-        dan: -(Math.abs(Number(position.dan) - Number(this.dan)))
+        dan: -(Math.abs(position.dan - this.dan))
       }
     }
   }
