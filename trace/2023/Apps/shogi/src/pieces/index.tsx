@@ -1,0 +1,10 @@
+export { Piece } from "./piece";
+export { Bishop } from "./bishop";
+export { Mt } from "./mt";
+export { Pawn } from "./pawn";
+export { Lance } from "./lance";
+export { Gold } from "./gold";
+export { Silver } from "./silver";
+export { Knight } from "./knight";
+export { Rook } from "./rook";
+export { King } from "./king";

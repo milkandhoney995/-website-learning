@@ -1,12 +1,43 @@
-import { Fragment } from "react";
+import { Fragment, useState, useEffect } from "react";
 import { Title, SubTitle, Works } from '../../components/index'
 
+// type workList = {
+//   text: string,
+//   href: string
+// }
+// type release = {
+//   title: string,
+//   workList: workList[],
+// }
+// type objectList = {
+//   pageTitle: string,
+//   playing: release,
+//   planning: release
+// }
+// type Data = {
+//   newWorks: objectList
+// }
+// export default interface WorkerType {
+//   pageTitle: string,
+//   planning: Object,
+//   playing: Object
+// }
 export default function New() {
+  const [works, setWorks] = useState([])
+  useEffect(() => {
+    const fetchWorks = async () => {
+      const response = await fetch('/api/newWorks')
+      const data = await response.json()
+      setWorks(data)
+    }
+    fetchWorks()
+  }, [])
+  console.log(works.newWorks)
   return(
     <Fragment>
       <div className="works__wrapper">
-        <Title title={'NEW WORKS'}></Title>
-        <SubTitle title={'放映予定の作品'}></SubTitle>
+        <Title title='{works.pageTitle}'></Title>
+        {/* <SubTitle title={works.newWorks.planning.title}></SubTitle> */}
         <Works
           text={'「パンドラとアクビ」役：ルイーズ　4/5〜ロードショー'}
           href={'https://dora-bi.com'}
