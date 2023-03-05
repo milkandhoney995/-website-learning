@@ -9,11 +9,12 @@ interface IConfirmProps {
 }
 
 export default function Alert(props: IConfirmProps) {
+
   return (
     <div>
       <Dialog
         open={props.open}
-        onClick={props.handleClose}
+        onClose={props.handleClose}
         aria-labelledby="alert-dialog-title"
         aria-describedby="alert-dialog-description"
       >
@@ -24,7 +25,9 @@ export default function Alert(props: IConfirmProps) {
           </DialogContentText>
         </DialogContent>
         <DialogActions>
-          <Button onClick={props.handleClose} color="primary">OK</Button>
+          <Button onClick={props.handleClose} color="primary">
+            OK
+          </Button>
         </DialogActions>
       </Dialog>
     </div>

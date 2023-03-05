@@ -3,6 +3,7 @@ import './index.scss';
 import {Setting} from "./setting";
 import { Piece, Bishop, Rook, Mt, Pawn, Lance, Gold, Silver, Knight, King } from './pieces/index'
 import { Board, Captured } from "./board"
+import _ from 'lodash';
 import Confirm from './material/confirm'
 import Alert from './material/alert'
 import { Button } from "@mui/material"
@@ -14,30 +15,27 @@ import Forward10OutlinedIcon from '@mui/icons-material/Forward10Outlined';
 export function make_board(sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1", language='Ja'): Piece[][] {
   let squares: Piece[][] = [];
   // i: 横
-  for (let i = 0; i < Setting.LENGTH; i++) {
+  for (let i = 0; i < Setting.LENGTH; ++i) {
     squares[i] = []
     // j: 縦
-    for (let j = 0; j < Setting.LENGTH; j++) {
+    for(let j = 0; j < Setting.LENGTH; ++j) {
       squares[i].push(new Mt())
     }
   }
-  console.log(squares[1])
-  if (sfen === "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1") {
-    for (let i = 0; i < Setting.LENGTH; i++) { // i = 横
-      squares[i][2] = new Pawn(false) // 歩
-      squares[i][6] = new Pawn(true) // 歩
+  if (sfen === "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1"){
+    for(let i = 0; i < Setting.LENGTH; ++i){ // i = 横
+      squares[i][2] = new Pawn(false)
+      squares[i][6] = new Pawn(true)
     }
-    // 後手
     squares[0][0] = new Lance(false)
     squares[8][0] = new Lance(false)
-    // 先手
     squares[0][8] = new Lance(true)
-    squares[8][9] = new Lance(true)
+    squares[8][8] = new Lance(true)
 
     squares[1][0] = new Knight(false)
     squares[7][0] = new Knight(false)
     squares[1][8] = new Knight(true)
-    squares[1][8] = new Knight(true)
+    squares[7][8] = new Knight(true)
 
     squares[2][0] = new Silver(false);
     squares[6][0] = new Silver(false);
@@ -63,13 +61,13 @@ export function make_board(sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1
 
 export function set_piece(n: number, is_black: boolean): Piece {
   let piece: Piece = new Mt();
-  if (n === 0) { piece = new Rook(is_black)}
-  if (n === 1) { piece = new Bishop(is_black)}
-  if (n === 2) { piece = new Gold(is_black)}
-  if (n === 3) { piece = new Silver(is_black)}
-  if (n === 4) { piece = new Knight(is_black)}
-  if (n === 5) { piece = new Lance(is_black)}
-  if (n === 6) { piece = new Pawn(is_black)}
+  if (n === 0) piece = new Rook(is_black)
+  if (n === 1) piece = new Bishop(is_black)
+  if (n === 2) piece = new Gold(is_black)
+  if (n === 3) piece = new Silver(is_black)
+  if (n === 4) piece = new Knight(is_black)
+  if (n === 5) piece = new Lance(is_black)
+  if (n === 6) piece = new Pawn(is_black)
   return piece
 }
 
@@ -84,15 +82,21 @@ export function set_kifu(): Array<number> {
   return kifu
 }
 
+// 駒が動ける位置を返す
+// 例：4一金の場合：以下がtrueになる
+// control_piece[2][1], control_piece[3][1], control_piece[4][1]
+// flag: 駒が移動できるか
 export function set_control_piece(flag: boolean = false): boolean[][] {
   let control_piece: boolean[][] = []
-  for (let i = 0; i < Setting.LENGTH; i++) {
+  for (let i = 0; i < Setting.LENGTH; ++i){
     control_piece[i] = new Array<boolean>(Setting.LENGTH).fill(flag)
   }
   return control_piece
 }
 
-
+// ある駒の利き（駒が移動できる範囲）を列挙
+// 手番の駒のマスは移動するときにはじいているため、ここではそのマスも利きに入れてしまう
+// ただし飛び道具はすり抜けしないために正しい効きを列挙する
 function control_pos_sub(
   control_pos: number[][],
   pos: Piece[][],
@@ -103,52 +107,60 @@ function control_pos_sub(
   kingy: number = -1,
   check_king: boolean = true
 ): void {
-  let num: number = pos[x][y].piece_num()
+  let num: number = pos[x][y].piece_num() // current_pos[x][y].piece_num()と同じ値
 
   // 歩
   if (num === 6) {
     if (turn ? y !== 0 : y !== Setting.LENGTH - 1) {
       let yy = (turn ? y - 1 : y + 1)
       ++control_pos[x][yy]
-
+      // console.log(`歩: x=${x}, y=${y}, turn=${turn ? "先手" : "後手"}, yy=${yy}, and result: ${control_pos[9][0]} 王手: ${x === kingx && yy === kingy}`)
       // 王手をしているか
       if (x === kingx && yy === kingy) {
-        control_pos[Setting.LENGTH][0] = x * Setting.LENGTH + y
-        control_pos[Setting.LENGTH][1] = num
+        control_pos[Setting.LENGTH][0] = x * Setting.LENGTH + y  // x*9 + y
+        control_pos[Setting.LENGTH][1] = num // 6
       }
+      console.log("not 王手", control_pos[x][yy])
     }
     return
   }
 
+  // 金、銀、桂、玉、全、圭、杏、と
   if (num === 2 || num === 3 || num === 4 || num === 7 || (11 <= num && num <= 14)) {
-    let dx: number[]
-    let dy: number[]
+    let dx: number[] // 右に移動(-), 左に移動(+)
+    let dy: number[] // 上に移動(-), 下に移動(+)
 
     // 桂馬
     if (num === 4) {
       dx = new Array<number>(-1, 1)
       dy = new Array<number>(-2, -2)
+      // console.log(`桂馬: x=${x}, y=${y}, dx=${dx}, dy=${dy}, num=${num}, turn=${turn ? "先手" : "後手"}`)
     } else if (num === 3) { // 銀
       dx = new Array<number>(-1, 0, 1, 1, 0, -1)
       dy = new Array<number>(-1, -1, -1, 0, 1, 1, 1, 0)
-    } else if(num === 2 || (11 <= num && num <= 14)) { // 金、と、杏、圭、全
+      // console.log(`銀: x=${x}, y=${y}, dx=${dx}, dy=${dy}, num=${num}, turn=${turn ? "先手" : "後手"}`)
+    } else if (num === 2 || (11 <= num && num <= 14)) { // 金、と、杏、圭、全
       dx = new Array<number>(-1, 0, 1, 1, 0, -1)
       dy = new Array<number>(-1, -1, -1, 0, 1, 0)
+      // console.log(`金、と、杏、圭、全: x=${x}, y=${y}, dx=${dx}, dy=${dy}, num=${num}, turn=${turn ? "先手" : "後手"}`)
     } else {
       if (check_king) { // 玉
         dx = new Array<number>(-1, 0, 1, 1, 1, 0, -1, -1)
         dy = new Array<number>(-1, -1, -1, 0, 1, 1, 1, 0)
+        // console.log(`玉: x=${x}, y=${y}, dx=${dx}, dy=${dy}, num=${num}, turn=${turn ? "先手" : "後手"}`)
       } else {
         dx = new Array<number>(0)
         dy = new Array<number>(0)
       }
     }
-    for (let i = 0; i < dx.length; i++) {
+    for (let i = 0; i< dx.length; ++i) {
       let xx = (turn ? x + dx[i] : x - dx[i])
-      let yy = (turn ? y + dy[i] : y -dy[i])
+      let yy = (turn ? y + dy[i] : y - dy[i])
+      // 0 ≦ xx ≦ 8,  0 ≦ yy ≦ 8
       if (0 <= xx && xx < Setting.LENGTH && 0 <= yy && yy < Setting.LENGTH) {
         ++control_pos[xx][yy]
-        if (xx ===kingx && yy === kingy) {
+        // 王手をしているか
+        if (xx === kingx && yy === kingy) {
           // 王手をしているか
           control_pos[Setting.LENGTH][0] = x * Setting.LENGTH + y
           control_pos[Setting.LENGTH][1] = num
@@ -157,7 +169,6 @@ function control_pos_sub(
     }
     return
   }
-
   // 香
   if (num === 5) {
     let dy: number = -1
@@ -165,7 +176,7 @@ function control_pos_sub(
     while (0 <= yy && yy < Setting.LENGTH) {
       ++control_pos[x][yy]
       // 王手をしているか
-      if (x ===kingx && yy === kingy) {
+      if (x === kingx && yy === kingy) {
         control_pos[Setting.LENGTH][0] = x * Setting.LENGTH + y
         control_pos[Setting.LENGTH][1] = num
       }
@@ -178,20 +189,19 @@ function control_pos_sub(
     }
     return
   }
-
-  // 飛と角は手番で動きが変わらない！
+  // 飛と角は手番で動きが変わらない！（対称）
   // 角
   if (num === 1 || num === 9) {
     let dx: number[] = new Array<number>(-1, 1, 1, -1)
     let dy: number[] = new Array<number>(-1, -1, 1, 1)
+    for (let i = 0; i < dx.length; ++i) {
 
-    for (let i = 0; i < dx.length; i++) {
       let xx = x + dx[i]
       let yy = y + dy[i]
-      while (0 <= xx && xx < Setting.LENGTH && 0<= yy && yy < Setting.LENGTH) {
+      while (0 <= xx && xx < Setting.LENGTH && 0 <= yy && yy < Setting.LENGTH) {
         ++control_pos[xx][yy]
         // 王手をしているか
-        if (xx ===kingx && yy === kingy) {
+        if (xx === kingx && yy === kingy) {
           control_pos[Setting.LENGTH][0] = x * Setting.LENGTH + y
           control_pos[Setting.LENGTH][1] = num
         }
@@ -209,13 +219,13 @@ function control_pos_sub(
     if (num === 9) {
       dx = new Array<number>(0, 1, 0, -1)
       dy = new Array<number>(-1, 0, 1, 0)
-      for (let i = 0; i < dx.length; i++) {
+      for (let i = 0; i< dx.length; ++i) {
         let xx = x + dx[i]
         let yy = y + dy[i]
-        if (0 <= xx && xx < Setting.LENGTH &&0 <= yy && yy < Setting.LENGTH) {
+        if (0 <= xx && xx < Setting.LENGTH && 0 <= yy && yy < Setting.LENGTH) {
           ++control_pos[xx][yy]
           // 王手をしているか
-          if (xx ===kingx && yy === kingy) {
+          if (xx === kingx && yy === kingy) {
             control_pos[Setting.LENGTH][0] = x * Setting.LENGTH + y
             control_pos[Setting.LENGTH][1] = num
           }
@@ -229,19 +239,19 @@ function control_pos_sub(
   if (num === 0 || num === 8) {
     let dx: number[] = new Array<number>(0, 1, 0, -1)
     let dy: number[] = new Array<number>(-1, 0, 1, 0)
-    for (let i = 0; i < dx.length; i++) {
+    for (let i = 0; i < dx.length; ++i) {
       let xx = x + dx[i]
       let yy = y + dy[i]
-      while (0 <= xx && xx < Setting.LENGTH && 0<= yy && yy < Setting.LENGTH) {
+      while (0 <= xx && xx < Setting.LENGTH && 0 <= yy && yy < Setting.LENGTH) {
         ++control_pos[xx][yy]
         // 王手をしているか
-        if (xx ===kingx && yy === kingy) {
-          control_pos[Setting.LENGTH][0] = x * Setting.LENGTH + y
-          control_pos[Setting.LENGTH][1] = num
+        if(xx === kingx && yy === kingy){
+          control_pos[Setting.LENGTH][0] = x * Setting.LENGTH + y;
+          control_pos[Setting.LENGTH][1] = num;
         }
         // 空きマスでなければ終わり
         // ただし相手玉なら終わらない
-        if (pos[xx][yy].piece_num() !== Setting.MT && !(pos[xx][yy].piece_num() === 7 && pos[xx][yy].turn() !== turn)) {
+        if(pos[xx][yy].piece_num() !== Setting.MT && !(pos[xx][yy].piece_num() === 7 && pos[xx][yy].turn() !== turn)){
           break
         }
         xx += dx[i]
@@ -250,15 +260,15 @@ function control_pos_sub(
     }
     // 竜の場合は斜めも
     if (num === 8) {
-      let dx: number[] = new Array<number>(-1, 1, 1, -1)
-      let dy: number[] = new Array<number>(-1, -1, 1, 1)
-      for (let i = 0; i < dx.length; i++) {
+      dx = new Array<number>(-1, 1, 1, -1)
+      dy = new Array<number>(-1, -1, 1, 1)
+      for(let i = 0; i< dx.length; ++i) {
         let xx = x + dx[i]
         let yy = y + dy[i]
-        if (0 <= xx && xx < Setting.LENGTH && 0<= yy && yy < Setting.LENGTH) {
+        if (0 <= xx && xx < Setting.LENGTH && 0 <= yy && yy < Setting.LENGTH) {
           ++control_pos[xx][yy]
           // 王手をしているか
-          if (xx ===kingx && yy === kingy) {
+          if (xx === kingx && yy === kingy) {
             control_pos[Setting.LENGTH][0] = x * Setting.LENGTH + y
             control_pos[Setting.LENGTH][1] = num
           }
@@ -269,7 +279,7 @@ function control_pos_sub(
   }
 }
 
-// 駒の利きを列挙
+// 駒の利き（駒が移動できる範囲）を列挙
 // 一つの駒を指定することもできる
 // ついでに王手をかけている駒の位置も返す
 
@@ -283,20 +293,27 @@ function control_pos(
   check_king: boolean = true
 ): number[][] {
   let control_pos: number[][] = []
-  for (let i = 0; i < Setting.LENGTH; i++) {
-    control_pos[i] = new Array<number>(Setting.LENGTH).fill(0)
+  for (let i = 0; i < Setting.LENGTH + 1; ++i) {
+    control_pos[i] = new Array<number>(Setting.LENGTH).fill(0) // [0, 0, 0, 0, 0, 0, 0, 0, 0]
   }
   if (x !== -1) {
     control_pos_sub(control_pos, pos, turn, x, y)
     return control_pos
   }
-  for (let i = 0; i < Setting.LENGTH; i++) {
-    for (let j = 0; j < Setting.LENGTH; j++) {
+
+  // 0 ≦ i ≦ 8, 0 ≦ j ≦ 8
+  for (let i = 0; i < Setting.LENGTH; ++i) {
+    for (let j = 0; j < Setting.LENGTH; ++j) {
+      // 空白のマスではなく、先手の時
       if (pos[i][j].piece_num() !== Setting.MT && pos[i][j].turn() === turn) {
-        control_pos_sub(control_pos, pos, turn, i ,j, kingx, kingy, check_king)
+        console.log("先手で、空白のマス", pos[i][j].turn())
+        // control_posの値を変える
+        control_pos_sub(control_pos, pos, turn, i, j, kingx, kingy, check_king)
       }
     }
   }
+  console.log("x !== -1じゃない", control_pos)
+  // ある駒の利き（駒が移動できる範囲）を列挙
   return control_pos
 }
 
@@ -307,9 +324,10 @@ function check(
   x: number = -1,
   y: number = -1
 ): boolean {
+  // 玉の位置
   if (x === -1) {
-    for (let i = 0; i < Setting.LENGTH; i++) {
-      for (let j = 0; j < Setting.LENGTH; j++) {
+    for (let i = 0; i < Setting.LENGTH; ++i) {
+      for (let j = 0; j < Setting.LENGTH; ++j) {
         if (pos[i][j].piece_num() === 7 && pos[i][j].turn() === turn) {
           x = i
           y = j
@@ -332,13 +350,13 @@ function mate(
   pos: Piece[][],
   captured: number[],
   turn: boolean
-) {
-  let tmp_pos = structuredClone(pos)
+): boolean {
+  let tmp_pos = _.cloneDeep(pos)
   // 玉の位置
   let x: number = -1
   let y: number = -1
-  for (let i = 0; i < Setting.LENGTH; i++) {
-    for (let j = 0; j < Setting.LENGTH; j++) {
+  for (let i = 0; i < Setting.LENGTH; ++i) {
+    for (let j = 0; j < Setting.LENGTH; ++j) {
       if (tmp_pos[i][j].piece_num() === 7 && tmp_pos[i][j].turn() === turn) {
         x = i
         y = j
@@ -359,12 +377,12 @@ function mate(
   // 玉自身で王手をかけている駒を取る場合を含む
   let dx: number[] = new Array<number>(1, 1, 0, -1, -1, -1, 0, 1);
   let dy: number[] = new Array<number>(0, 1, 1, 1, 0, -1, -1, -1);
-  for (let i = 0; i < dx.length; i++) {
+  for (let i = 0; i < dx.length; ++i) {
     let xx = x + dx[i]
     let yy = y + dy[i]
-    if (xx < 0 || Setting.LENGTH <= xx || yy < 0 || Setting.LENGTH <= yy) { continue }
+    if (xx < 0 || Setting.LENGTH <= xx || yy < 0 || Setting.LENGTH <= yy) continue
     // 自分の駒があるとダメ
-    if (tmp_pos[xx][yy].piece_num() !== Setting.MT && tmp_pos[xx][yy].turn() === turn) { continue }
+    if (tmp_pos[xx][yy].piece_num() !== Setting.MT && tmp_pos[xx][yy].turn() === turn) continue
     // 逃げられるマスがあれば詰んでいない
     if (atc_controls[xx][yy] === 0) return false
   }
@@ -376,30 +394,29 @@ function mate(
   const atc = atc_controls[Setting.LENGTH][0]
   const atcx: number = Math.floor(atc / Setting.LENGTH)
   const atcy: number = atc % Setting.LENGTH
-
   // 王手をかけている駒の種類
   const num: number = atc_controls[Setting.LENGTH][1]
-  const piece: Piece = tmp_pos[atcx][atcy]
-
+  const piece = tmp_pos[atcx][atcy]
   // 1. 王手をかけている駒を（玉以外で）取れるか
   // 玉で取れる場合はここではチェックしなくてよい
   // 2. 桂馬以外の飛び道具で王手されているとき合い駒できるか
-  for (let i = 0; i < Setting.LENGTH; i++) {
-    for (let j = 0; j < Setting.LENGTH; j++) {
+  for (let i = 0; i < Setting.LENGTH; ++i) {
+    for (let j = 0; j < Setting.LENGTH; ++j) {
       // 自分の駒かチェック
-      if (tmp_pos[i][j].turn !== turn || tmp_pos[i][j].piece_num() === Setting.MT || tmp_pos[i][j].piece_num() === 7) continue
+      if (tmp_pos[i][j].turn() !== turn || tmp_pos[i][j].piece_num() === Setting.MT || tmp_pos[i][j].piece_num() === 7) continue
       const tmp_controls: number[][] = control_pos(tmp_pos, turn, i, j)
 
       // 1. 王手をかけている駒を（玉以外で）取れるか
       if (tmp_controls[atcx][atcy]) {
-        tmp_controls[atcx][atcy] = tmp_pos[i][j]
+        // 取ったときに王手がかかっていなければ詰んでいない
+        tmp_pos[atcx][atcy] = tmp_pos[i][j]
         tmp_pos[i][j] = new Mt()
         if (!check(tmp_pos, turn, x, y)) return false
         tmp_pos[i][j] = tmp_pos[atcx][atcy]
         tmp_pos[atcx][atcy] = piece
       }
+      // 2.桂馬以外の飛び道具で王手されているとき合い駒できるか
 
-      // 2. 桂馬以外の飛び道具で王手されているとき合い駒できるか
       if (num === 0 || num === 1 || num === 5 || num === 8 || num === 9) {
         let dx: number = atcx - x
         let dy: number = atcy - y
@@ -414,9 +431,10 @@ function mate(
             tmp_pos[xx][yy] = tmp_pos[i][j]
             tmp_pos[i][j] = new Mt()
 
-            // 王手がかかっていなければ積んでいない
+            // 王手がかかっていなければ詰んでいない
             if (!check(tmp_pos, turn, x, y)) return false
             tmp_pos[i][j] = tmp_pos[xx][yy]
+            // 駒があるところだと合い駒できないため、tmp_pos[xx][yy]は必ずMtである
             tmp_pos[xx][yy] = new Mt()
           }
           xx += dx
@@ -427,7 +445,7 @@ function mate(
   }
 
   // 持ち駒を使って合い駒できるか
-  if (num === 0 || num === 1 || num === 5 || num === 8 || num ===9) {
+  if (num === 0 || num === 1 || num === 5 || num === 8 || num === 9) {
     let dx: number = atcx - x
     let dy: number = atcy - y
     if (dx !== 0) dx /= Math.abs(dx)
@@ -437,7 +455,7 @@ function mate(
     let yy: number = y + dy
     while (xx !== atcx || yy !== atcy) {
       // 持ち駒で合い駒できるか
-      for (let i = 0; i < Setting.WHITE; i++) {
+      for (let i = 0; i < Setting.WHITE; ++i) {
         if (captured[i] === 0) continue
         tmp_pos[xx][yy] = set_piece(i, turn)
         if (can_move(pos, tmp_pos, captured, -1, -1, xx, yy, turn)) {
@@ -454,8 +472,8 @@ function mate(
       yy += dy
     }
   }
+  return true
 }
-
 
 // 動けるマスか
 // 動かす前の盤面、動かした後の盤面、移動前の位置、移動後の位置、手番
@@ -473,7 +491,7 @@ function can_move(
   // 駒を打つときは行き所がないかと、打ち歩詰めのみをチェックすればよい
   // 二歩は別でチェックする
   if (xx === -1) {
-    if (num === 4) return (turn ? y > 1 : y < Setting.LENGTH - 1 -1)
+    if (num === 4) return (turn ? y > 1 : y < Setting.LENGTH - 1 - 1)
     if (num === 5) return (turn ? y !== 0 : y !== Setting.LENGTH - 1)
     if (num === 6) {
       if ((turn ? y === 0 : y === Setting.LENGTH - 1)) return false
@@ -494,9 +512,9 @@ function nifu(
   pos: Piece[][],
   x: number,
   turn: boolean
-): boolean {
+  ): boolean {
   let cnt = 0
-  for (let i = 0; i < Setting.LENGTH; i++) {
+  for (let i = 0; i < Setting.LENGTH; ++i) {
     if (pos[x][i].piece_num() === 6 && pos[x][i].turn() === turn) {
       ++cnt
     }
@@ -519,14 +537,14 @@ interface IGameProps {
   // 掴んでいる駒
   clicked_piece: number
   final_piece: number
-  black_name: string;
-  white_name: string;
-  is_black: boolean;
-  moved_piece: number;
-  promotion: boolean;
-  resign: boolean;
-  result: boolean;
-  is_mobile: boolean;
+  black_name: string
+  white_name: string
+  is_black: boolean
+  moved_piece: number
+  promotion: boolean
+  resign: boolean
+  result: boolean
+  is_mobile: boolean
 }
 
 interface IGameState {
@@ -534,43 +552,41 @@ interface IGameState {
   start_pos: Piece[][]
   start_black_piece: number[]
   start_white_piece: number[]
-
   // 現局面
   current_pos: Piece[][]
   current_black_piece: number[]
   current_white_piece: number[]
-
   // 指し手の候補
   control_piece: boolean[][]
-
-  // 対局の記録：棋譜
+  // 棋譜
   kifu: Array<number>
-
   // 先手番かどうか
   turn: boolean
   // 手数
   moves: number
-  moves_sub: number // 表示用
-  moves_max: number //終局時の手数
+  // 表示用の手数
+  moves_sub: number
+  // 終局時の手数
+  moves_max: number
   // 掴んでいる駒
   clicked_piece: number
   // 最後に動かした駒
   final_piece: number
-  black_name: string;
-  white_name: string;
+  // 先手の名前
+  black_name: string
+  // 後手の名前
+  white_name: string
   // 自分が先手かどうか
   is_black: boolean
   // 駒を成るときに使う移動先
-  moved_piece: number;
-  promotion: boolean;
-
+  moved_piece: number
+  promotion: boolean
   // 投了メッセージを表示するか
-  resign: boolean;
+  resign: boolean
   // 結果メッセージ
-  result: boolean;
+  result: boolean
   // スマホかどうか
-  is_mobile: boolean;
-
+  is_mobile: boolean
 }
 export class Game extends React.Component<IGameProps, IGameState> {
   constructor(props: IGameProps) {
@@ -604,46 +620,61 @@ export class Game extends React.Component<IGameProps, IGameState> {
     this.handleResultClose = this.handleResultClose.bind(this)
   }
 
-  handleClick(i :number) {
-    if (this.state.moves < 0) return
+  // clicked_piece: 掴んでいる駒の番号
+  // turn: 先手か否か
+  // tmp_pos: 動かした後の盤面
+  // current_black_piece, current_white_piece: 相手から獲った駒の配列
+  // 初期状態： [0, 0, 0, 0, 0, 0, 0](length: 7)
+  // 例：銀桂歩4: [0, 0, 0, 1, 1, 0, 4]
+
+  handleClick(i: number){
+    if(this.state.moves < 0) return
     let clicked_piece: number = this.state.clicked_piece
     const turn = this.state.turn
-    // 動かした後の盤面
-    let tmp_pos = structuredClone(this.state.current_pos)
-    const current_black_piece = structuredClone(this.state.current_black_piece)
-    const current_white_piece = structuredClone(this.state.current_white_piece)
+    let tmp_pos = _.cloneDeep(this.state.current_pos)
+    const current_black_piece = _.cloneDeep(this.state.current_black_piece)
+    const current_white_piece = _.cloneDeep(this.state.current_white_piece)
 
-    // 持ち駒をクリックしたとき
-    if (i < Setting.WHITE * 2) {
+    // 0 ≦ i ≦ 13：持ち駒をクリックしたとき
+    if (i < Setting.WHITE * 2) { // 7*2 = 14
+      // clicked_piece === 95: 持ち駒をクリックしたとき
       if (clicked_piece === Setting.UNCLICKED) {
-        if ((turn ? (i < Setting.WHITE && current_black_piece[i] > 0) : (i >= Setting.WHITE && current_white_piece[i - Setting.WHITE] > 0))) {
+        if ((
+          turn ?
+          // 先手番で、0 ≦ i ≦ 6
+          (i < Setting.WHITE && current_black_piece[i] > 0) :
+          // 後手番で、7 ≦ i ≦ 13
+          (i >= Setting.WHITE && current_white_piece[i - Setting.WHITE] > 0)
+          )) {
           // 候補の列挙
           // 駒を打つときは王手がかかっていないかと、行き所がないか、二歩、打ち歩詰めをチェックする
-          let tmp_control_piece = set_control_piece(true)
-          let num = (i >= Setting.WHITE ? i - Setting.WHITE : i)
 
-          for (let x = 0; x < Setting.LENGTH; x++) {
-            for (let y = 0; y < Setting.LENGTH; y++) {
-              // 駒がある場所は置けない
-              if (tmp_pos[x][y].piece_num() !== Setting.MT) {
-                tmp_control_piece[x][y] = false
-              }
-              else if (num === 4) {
-                tmp_control_piece[x][y] = (turn ? y > 1 : y < Setting.LENGTH - 1 - 1)
-              }
-              else if (num === 5) {
-                tmp_control_piece[x][y] = (turn ? y !== 0 : y !== Setting.LENGTH - 1)
-              }
+          // 先手の駒が動ける位置を返す
+          let tmp_control_piece = set_control_piece(true)
+          // i ≧ 7なら、i - 7を返す
+          let num = (i >= Setting.WHITE ? i - Setting.WHITE : i)
+          for (let x = 0; x < Setting.LENGTH; ++x) {
+            for (let y = 0; y < Setting.LENGTH; ++y) {
+              // 何かしら駒がある場合、先手の駒は動けないのでfalse
+              if (tmp_pos[x][y].piece_num() !== Setting.MT) { tmp_control_piece[x][y] = false }
+              // 桂
+              else if (num === 4) { tmp_control_piece[x][y] = (turn ? y > 1 : y < Setting.LENGTH - 1 - 1) }
+              // 香
+              else if (num === 5) { tmp_control_piece[x][y] = (turn ? y !== 0 : y !== Setting.LENGTH - 1) }
+              // 歩
               else if (num === 6) {
                 tmp_control_piece[x][y] = (turn ? y !== 0 : y !== Setting.LENGTH - 1)
                 tmp_pos[x][y] = set_piece(num, turn)
-                if (nifu(tmp_pos, x, turn)) {
-                  tmp_control_piece[x][y] = false
-                }
+                if (nifu(tmp_pos, x, turn)) tmp_control_piece[x][y] = false
+
                 // 打ち歩詰めかどうか
                 // 前に敵玉がいるときだけチェックすればよい
-                if ((turn ? (y > 1 && tmp_pos[x][y - 1].piece_num() === 7 && tmp_pos[x][y - 1].turn() !== turn) : (y < Setting.LENGTH - 1 && tmp_pos[x][y + 1].piece_num() === 7 && tmp_pos[x][y + 1].turn() !== turn))) {
-                  if (mate(tmp_pos, (turn ? current_white_piece : current_black_piece), !turn)) {
+                if (
+                  (turn ?
+                    (y > 1 && tmp_pos[x][y - 1].piece_num() === 7 && tmp_pos[x][y - 1].turn() !== turn) :
+                    (y < Setting.LENGTH - 1 && tmp_pos[x][y + 1].piece_num() === 7 && tmp_pos[x][y + 1].turn() !== turn)
+                    )){
+                  if(mate(tmp_pos, (turn ? current_white_piece : current_black_piece), !turn)) {
                     tmp_control_piece[x][y] = false
                   }
                 }
@@ -658,20 +689,173 @@ export class Game extends React.Component<IGameProps, IGameState> {
             }
           }
           this.setState({
-            control_piece: tmp_control_piece,
+            control_piece: tmp_control_piece, 
             clicked_piece: i
           })
         }
         return
       }
       this.setState({
-        clicked_piece: Setting.UNCLICKED,
+        clicked_piece: Setting.UNCLICKED, // 95
         control_piece: set_control_piece()
       })
       return
     }
-  }
 
+    // 14 ≦ i ≦ 94：board上のマスをクリックしたとき（持ち駒の分を引く）
+    let x: number = Math.floor((i - Setting.WHITE * 2) / Setting.LENGTH) // (i - 14)/9
+    let y: number = (i - Setting.WHITE * 2) % Setting.LENGTH // (i - 14)/9の商
+    const current_pos = this.state.current_pos.concat()
+
+    console.log(current_pos)
+
+    console.log(`clicked_piece: ${this.state.clicked_piece}, i: ${i}, x:${x}, y:${y} piece_num: ${current_pos[x][y].piece_num()}`)
+    // 駒を掴んでないとき
+    // // clicked_piece === 95: 持ち駒をクリックしたとき
+    if (this.state.clicked_piece === Setting.UNCLICKED) {
+      console.log("持ち駒", x, y)
+      // 手番の駒以外はダメ
+      if (current_pos[x][y].piece_num() === Setting.MT || current_pos[x][y].turn() !== turn) { return }
+      // 候補の列挙
+      // 王手がかかっていないかのみをチャックすればよい
+      // 駒を成らないので候補に行き所がない駒が含まれることもあるが、チェックする必要はない
+      // これは適切な移動ならば行き所のない駒はできないため
+
+      // 駒の利き（駒が移動できる範囲）を列挙する
+      let tmp_control_pos = control_pos(current_pos, turn, x, y, -1, -1, false);
+      // 駒が動ける位置を列挙する
+      let tmp_control_piece = set_control_piece(false);
+      for(let xx = 0; xx < Setting.LENGTH; ++xx){
+        for(let yy = 0; yy < Setting.LENGTH; ++yy){
+          if(tmp_control_pos[xx][yy] === 0) continue
+          // 手番の駒はダメ
+          if(current_pos[xx][yy].piece_num() !== Setting.MT && current_pos[xx][yy].turn() === turn) continue
+          let piece = tmp_pos[xx][yy]
+          tmp_pos[xx][yy] = tmp_pos[x][y]
+          // 駒がなくなったマスに空白を追加
+          tmp_pos[x][y] = new Mt()
+          tmp_control_piece[xx][yy] = !check(tmp_pos, turn);
+          tmp_pos[x][y] = tmp_pos[xx][yy];
+          tmp_pos[xx][yy] = piece;
+        }
+      }
+      this.setState({
+        control_piece: tmp_control_piece,
+        clicked_piece: i,
+      })
+      return
+    }
+    // ここでは必ず盤面をクリックしている
+    let current_control_piece = this.state.control_piece;
+    console.log("持ち駒じゃない: ", x, y, current_control_piece[x][y])
+    // 候補になかったらダメ
+    if(!current_control_piece[x][y]){
+      console.log("候補にない")
+      this.setState({
+        control_piece: set_control_piece(),
+        clicked_piece: Setting.UNCLICKED,
+      })
+      return
+    }
+
+    console.log("候補にある:", clicked_piece, "、先手:", turn)
+
+    // 以下では正しい指し手であることが保証されている
+    const moves = this.state.moves;
+    let tmp_black_piece = _.cloneDeep(current_black_piece);
+    let tmp_white_piece = _.cloneDeep(current_white_piece);
+    let xx: number = -1
+    let yy: number = -1
+    // 持ち駒を掴んでいるとき
+    if (clicked_piece < Setting.WHITE * 2) {
+      // 先手の駒を掴んでいる場合
+      // 掴むときに手番かチェックしているので、ここではチェックしなくてよい
+      if (turn) {
+        // 持ち駒の更新
+        --tmp_black_piece[clicked_piece];
+         // 盤面の更新
+        tmp_pos[x][y] = set_piece(clicked_piece, turn);
+      } else {
+        // 持ち駒の更新
+        --tmp_white_piece[clicked_piece - Setting.WHITE];
+         // 盤面の更新
+        tmp_pos[x][y] = set_piece(clicked_piece - Setting.WHITE, turn);
+      }
+    } else {
+      // 持ち駒の分を引く
+      xx = Math.floor((clicked_piece - Setting.WHITE * 2) / Setting.LENGTH);
+      yy = (clicked_piece- Setting.WHITE * 2) % Setting.LENGTH
+      let piece = tmp_pos[x][y]
+      // 盤面の更新
+      tmp_pos[x][y] = tmp_pos[xx][yy]
+      tmp_pos[xx][yy] = new Mt()
+      // 持ち駒の更新
+      let num: number = piece.piece_num()
+      if(num !== Setting.MT){
+        // 成っている駒を生に戻す
+        if(num > Setting.WHITE){
+          num -= Setting.MT / 2
+        }
+        turn ? ++tmp_black_piece[num] : ++tmp_white_piece[num]
+      }
+    }
+
+    // 成れるときは聞く
+    // 条件：盤面から3段目に移動または3段目から移動するときで、金と玉以外の成っていない駒のとき
+    let num: number = tmp_pos[x][y].piece_num()
+    let is_promoted: Boolean = false
+    if (xx !== -1 && (turn ? (y < 3 || yy < 3) : (y > Setting.LENGTH - 1 - 3 || yy > Setting.LENGTH - 1 - 3)) && num < Setting.WHITE && Setting.PIECES[num + Setting.MT / 2] !== "") {
+      // 必ず成るときは聞かずに成る
+      // 歩、香の1段目、桂の1,2段目
+      if (5 <= num && num <= 6) {
+        if ((turn ? y === 0 : y === Setting.LENGTH - 1)) {
+          tmp_pos[x][y].promote()
+          is_promoted = true
+        }
+      }
+      else if (num === 4) {
+        if ((turn ? y < 2 : y > Setting.LENGTH - 1 - 2)) {
+          tmp_pos[x][y].promote()
+          is_promoted = true
+        }
+      }
+      if (!is_promoted) {
+        this.setState({
+          moved_piece: i,
+          promotion: true
+        })
+        return
+      }
+    }
+    let kifu = this.state.kifu
+    kifu = kifu.concat(clicked_piece)
+    kifu = kifu.concat(is_promoted ? (i + Setting.LENGTH * Setting.LENGTH) : i)
+    this.setState({
+      current_pos: tmp_pos,
+      current_black_piece: tmp_black_piece,
+      current_white_piece: tmp_white_piece,
+      control_piece: set_control_piece(),
+      kifu: kifu,
+      turn: !turn,
+      moves: moves + 1,
+      moves_sub: moves + 1,
+      clicked_piece: Setting.UNCLICKED,
+      final_piece: i
+    })
+    // 詰んでいたら対局終了
+    if (mate(tmp_pos, (turn ? tmp_white_piece : tmp_black_piece), !turn)) {
+      setTimeout(() => {
+        this.setState({
+          result: true
+        })
+      }, 200)
+      this.setState({
+        moves: -1,
+        moves_max: moves + 1
+      })
+      return
+    }
+  }
 
   resign() {
     const moves: number = this.state.moves
@@ -689,39 +873,41 @@ export class Game extends React.Component<IGameProps, IGameState> {
     })
     return
   }
-  handlePromotion(is_promoted: boolean) {
+
+  handlePromotion(is_promoted: boolean){
     // 正しい動きであることは保証されている
     let clicked_piece: number = this.state.clicked_piece
     const turn = this.state.turn
-    let tmp_pos = structuredClone(this.state.current_pos)
-    const current_black_piece = structuredClone(this.state.current_black_piece)
-    const current_white_piece = structuredClone(this.state.current_white_piece)
+    let tmp_pos = _.cloneDeep(this.state.current_pos)  // 動かした後の盤面
+    const current_black_piece = _.cloneDeep(this.state.current_black_piece)
+    const current_white_piece = _.cloneDeep(this.state.current_white_piece)
     const moves = this.state.moves
-    let tmp_black_piece = structuredClone(current_black_piece)
-    let tmp_white_piece = structuredClone(current_white_piece)
+    let tmp_black_piece = _.cloneDeep(current_black_piece)
+    let tmp_white_piece = _.cloneDeep(current_white_piece)
     let xx: number = -1
     let yy: number = -1
     let i = this.state.moved_piece
     let x: number = Math.floor((i - Setting.WHITE * 2) / Setting.LENGTH)
     let y: number = (i - Setting.WHITE * 2) % Setting.LENGTH
-
     // 持ち駒を掴んでいるとき
     if (clicked_piece < Setting.WHITE * 2) {
+      // 先手の駒を掴んでいる場合
       if (turn) {
         // 持ち駒の更新
         --tmp_black_piece[clicked_piece]
-        // 盤面の更新
+         // 盤面の更新
         tmp_pos[x][y] = set_piece(clicked_piece, turn)
       } else {
         // 持ち駒の更新
-        --tmp_white_piece[clicked_piece - Setting.WHITE]
-        // 盤面の更新
+        --tmp_white_piece[clicked_piece - Setting.WHITE] // number - 7
+         // 盤面の更新
         tmp_pos[x][y] = set_piece(clicked_piece - Setting.WHITE, turn)
       }
-    } else {
+    }
+    else {
       // 持ち駒の分を引く
-      xx = Math.floor((clicked_piece - Setting.WHITE * 2) / Setting.WHITE)
-      yy = (clicked_piece - Setting.WHITE * 2) % Setting.LENGTH
+      xx = Math.floor((clicked_piece - Setting.WHITE * 2) / Setting.LENGTH) // (number - 7*2)/9
+      yy = (clicked_piece - Setting.WHITE * 2) % Setting.LENGTH // number - 7*2
       let piece = tmp_pos[x][y]
       // 盤面の更新
       tmp_pos[x][y] = tmp_pos[xx][yy]
@@ -729,6 +915,7 @@ export class Game extends React.Component<IGameProps, IGameState> {
       // 持ち駒の更新
       let num: number = piece.piece_num()
       if (num !== Setting.MT) {
+        // 成っている駒を生に戻す
         if (num > Setting.WHITE) {
           num -= Setting.MT / 2
         }
@@ -770,7 +957,6 @@ export class Game extends React.Component<IGameProps, IGameState> {
 
   handleResign(resign: boolean) {
     const moves = this.state.moves
-    // const [open, setOpen] = useState<boolean>(false)
     if (resign) {
       setTimeout(() => {
         this.setState({
@@ -792,9 +978,10 @@ export class Game extends React.Component<IGameProps, IGameState> {
     }
   }
 
+  // ここがresignだったからAlertが閉じなかった
   handleResultClose() {
     this.setState({
-      resign: false
+      result: false
     })
   }
 
@@ -804,31 +991,27 @@ export class Game extends React.Component<IGameProps, IGameState> {
     if (target_moves > this.state.moves_max) {
       target_moves = this.state.moves_max
     }
-
     let cur = 0
     let idx = 0
     const kifu = this.state.kifu
-    let tmp_pos = structuredClone(this.state.start_pos)
-    let tmp_black_piece = structuredClone(this.state.start_black_piece)
-    let tmp_white_piece = structuredClone(this.state.start_white_piece)
+    let tmp_pos = _.cloneDeep(this.state.start_pos)
+    let tmp_black_piece = _.cloneDeep(this.state.start_black_piece)
+    let tmp_white_piece = _.cloneDeep(this.state.start_white_piece)
     let clicked_piece = Setting.UNCLICKED
     let final_piece = Setting.UNCLICKED
     let turn = true
-
     while (cur < target_moves) {
       let i = kifu[idx]
-
-      // コマを掴んでいない時
+      // 駒を掴んでいないとき
       if (clicked_piece === Setting.UNCLICKED) {
         clicked_piece = kifu[idx]
         ++idx
         continue
       }
       // 持ち駒を掴んでいるとき
-      if (clicked_piece < Setting.UNCLICKED * 2) {
-        const x: number = Math.floor((i - Setting.WHITE * 2) / Setting.LENGTH)
-        const y: number = (i - Setting.WHITE * 2) % Setting.LENGTH
-
+      if(clicked_piece < Setting.WHITE * 2){
+        const x = Math.floor((i - Setting.WHITE * 2) / Setting.LENGTH)
+        const y = (i - Setting.WHITE * 2) % Setting.LENGTH
         // 先手の駒を掴んでいる場合
         if (turn) {
           // 持ち駒の更新
@@ -848,20 +1031,18 @@ export class Game extends React.Component<IGameProps, IGameState> {
         ++idx
         continue
       }
-
       // 持ち駒の分を引く
       // 成りフラグをチェック
       let promoted_flag = false
-      if (i >= Setting.LENGTH * Setting.LENGTH + Setting.MT * 2) {
+      if (i >= Setting.LENGTH * Setting.LENGTH + Setting.WHITE * 2) {
         promoted_flag = true
         i -= Setting.LENGTH * Setting.LENGTH
       }
-      const x: number = Math.floor((i - Setting.WHITE * 2) / Setting.LENGTH)
-      const y: number = (i - Setting.WHITE * 2) % Setting.LENGTH
-      const xx: number = Math.floor((clicked_piece - Setting.WHITE * 2) / Setting.LENGTH)
-      const yy: number = (clicked_piece - Setting.WHITE * 2) % Setting.LENGTH
+      const x = Math.floor((i - Setting.WHITE * 2) / Setting.LENGTH)
+      const y = (i - Setting.WHITE * 2) % Setting.LENGTH
+      const xx = Math.floor((clicked_piece - Setting.WHITE * 2) / Setting.LENGTH)
+      const yy = (clicked_piece - Setting.WHITE * 2) % Setting.LENGTH
       let piece = tmp_pos[x][y]
-
       // 盤面の更新
       tmp_pos[x][y] = tmp_pos[xx][yy]
       tmp_pos[xx][yy] = new Mt()
@@ -872,7 +1053,7 @@ export class Game extends React.Component<IGameProps, IGameState> {
         if (num > Setting.WHITE) {
           num -= Setting.MT / 2
         }
-        turn ? ++ tmp_black_piece[num] : ++ tmp_white_piece[num]
+        turn ? ++tmp_black_piece[num] : ++tmp_white_piece[num]
       }
 
       if (promoted_flag) tmp_pos[x][y].promote()
@@ -905,47 +1086,47 @@ export class Game extends React.Component<IGameProps, IGameState> {
     const font_size = (is_mobile ? 'small' : 'large')
     const button_size = (is_mobile ? 'small' : 'medium')
 
-    const back10 = (this.state.moves === -1 && moves > 0 ? 
-      <Button variant="contained" onClick={()=> this.setBoard(moves - 10)}>
-        <Replay10OutlinedIcon fontSize={font_size} />
+    const back10 = (this.state.moves === -1 && moves > 0 ?
+      <Button variant="contained" onClick={() => this.setBoard(moves - 10)}>
+        <Replay10OutlinedIcon fontSize={font_size}/>
       </Button>
       :
-      <Button variant="contained" disabled onClick={()=> this.setBoard(moves - 10)}>
-        <Replay10OutlinedIcon fontSize={font_size} />
+      <Button variant="contained" disabled onClick={() => this.setBoard(moves - 10)}>
+        <Replay10OutlinedIcon fontSize={font_size}/>
       </Button>
-    )
-    const back1 = (this.state.moves === -1 && moves > 0 ? 
-      <Button variant="contained" onClick={()=> this.setBoard(moves - 1)}>
-        <ArrowBackIosIcon fontSize={font_size} />
-      </Button>
-      :
-      <Button variant="contained" disabled onClick={()=> this.setBoard(moves - 1)}>
-        <ArrowBackIosIcon fontSize={font_size} />
-      </Button>
-    )
-    const forward1 = (this.state.moves === -1 && moves < this.state.moves_max ? 
-      <Button variant="contained" onClick={()=> this.setBoard(moves + 1)}>
-        <ArrowForwardIosIcon fontSize={font_size} />
+      )
+    const back1 = (this.state.moves === -1 && moves > 0 ?
+      <Button variant="contained" onClick={() => this.setBoard(moves - 1)}>
+        <ArrowBackIosIcon fontSize={font_size}/>
       </Button>
       :
-      <Button variant="contained" disabled onClick={()=> this.setBoard(moves + 1)}>
-        <ArrowForwardIosIcon fontSize={font_size} />
+      <Button variant="contained" disabled onClick={() => this.setBoard(moves - 1)}>
+        <ArrowBackIosIcon fontSize={font_size}/>
       </Button>
-    )
-    const forward10 = (this.state.moves === -1 && moves < this.state.moves_max ? 
-      <Button variant="contained" onClick={()=> this.setBoard(moves + 10)}>
-        <Forward10OutlinedIcon fontSize={font_size} />
+      )
+    const forward1 = (this.state.moves === -1 && moves < this.state.moves_max ?
+      <Button variant="contained" onClick={() => this.setBoard(moves + 1)}>
+        <ArrowForwardIosIcon fontSize={font_size}/>
       </Button>
       :
-      <Button variant="contained" disabled onClick={()=> this.setBoard(moves + 10)}>
-        <Forward10OutlinedIcon fontSize={font_size} />
+      <Button variant="contained" disabled onClick={() => this.setBoard(moves + 1)}>
+        <ArrowForwardIosIcon fontSize={font_size}/>
+      </Button>
+      )
+    const forward10 = (this.state.moves === -1 && moves < this.state.moves_max ?
+      <Button variant="contained" onClick={() => this.setBoard(moves + 10)}>
+        <Forward10OutlinedIcon fontSize={font_size}/>
+      </Button>
+      :
+      <Button variant="contained" disabled onClick={() => this.setBoard(moves + 10)}>
+        <Forward10OutlinedIcon fontSize={font_size}/>
       </Button>
     )
     if (is_mobile) {
       return(
         <div className="game-info">
           <div className="game">
-          <div className="game-sub">
+            <div className="game-sub">
             {this.state.moves >= 0 &&
               <div className="mobile-button">
                 <Button variant="contained" color="secondary" size={button_size} onClick={() => this.resign()}>
@@ -953,76 +1134,71 @@ export class Game extends React.Component<IGameProps, IGameState> {
                 </Button>
               </div>
             }
-            <div className="mobile-button">
-              <Button variant="contained" color="primary" size={button_size} onClick={() => this.rotate()}>
-                反転
-              </Button>
+              <div className="mobile-button">
+                <Button variant="contained" color="primary" size={button_size} onClick={() => this.rotate()} >
+                  反転
+                </Button>
+              </div>
             </div>
             {this.state.moves === -1 && moves_max > 0 &&
-            <div className="mobile-button">
-              <Button variant="contained" color="inherit" size={button_size} onClick={() => this.setBoard(0)}>
-                開始局面
-              </Button>
-            </div>
+              <div className="mobile-button">
+                <Button variant="contained" size={button_size} color="inherit" onClick={() => this.setBoard(0)}>
+                  開始局面
+                </Button>
+              </div>
             }
             {this.state.moves === -1 && moves_max > 0 &&
-            <div className="mobile-button">
-              <Button variant="contained" color="inherit" size={button_size} onClick={() => this.setBoard(moves_max)}>
-                終局面
-              </Button>
-            </div>
+              <div className="mobile-button">
+                <Button variant="contained" size={button_size} color="inherit" onClick={() => this.setBoard(moves_max)}>
+                  終局図
+                </Button>
+              </div>
             }
-          </div>
-          <div className="center bold">
-            {legend}
-          </div>
-          <div className="center">
-            {back10}
-            &nbsp;
-            {back1}
-            &nbsp;
-            {moves}手目
-            &nbsp;
-            {forward1}
-            &nbsp;
-            {forward10}
-          </div>
-          <div className={game}>
-            <div className="mobile-game-info-white white">
-              <div>{"△"}</div>
-              <Captured
-                squares={this.state.current_white_piece}
-                clicked_piece={this.state.clicked_piece}
-                is_black={false}
-                turn={this.state.turn}
-                onClick={i => this.handleClick(i)}
-                is_mobile={is_mobile}
-              />
+            <div className="center bold">
+              {legend}
             </div>
-            <div>
-              <Board
-                squares={this.state.current_pos}
-                onClick={i => this.handleClick(i)}
-                clicked_piece={this.state.clicked_piece}
-                control_piece={this.state.control_piece}
-                final_piece={this.state.final_piece}
-                is_mobile={is_mobile}
-              />
+            <div className="center">
+              {back1}
+              &nbsp;
+              {moves}手目
+              &nbsp;
+              {forward1}
             </div>
-            <div className="mobile-game-info-black">
-              <div>{"▲"}</div>
-              <Captured
-                squares={this.state.current_black_piece}
-                clicked_piece={this.state.clicked_piece}
-                is_black={true}
-                turn={this.state.turn}
-                onClick={i => this.handleClick(i)}
-                is_mobile={is_mobile}
-              />
+            <div className={game}>
+              <div className="mobile-game-info-white white">
+                <div>{"△"}</div>
+                <Captured
+                  squares={this.state.current_white_piece}
+                  clicked_piece={this.state.clicked_piece}
+                  is_black={false}
+                  turn={this.state.turn}
+                  onClick={i => this.handleClick(i)}
+                  is_mobile={is_mobile}
+                />
+              </div>
+              <div>
+                <Board
+                  squares={this.state.current_pos}
+                  onClick={i => this.handleClick(i)}
+                  clicked_piece={this.state.clicked_piece}
+                  control_piece={this.state.control_piece}
+                  final_piece={this.state.final_piece}
+                  is_mobile={is_mobile}
+                />
+              </div>
+              <div className="mobile-game-info-black">
+                <div>{"▲"}</div>
+                <Captured
+                  squares={this.state.current_black_piece}
+                  clicked_piece={this.state.clicked_piece}
+                  is_black={true}
+                  turn={this.state.turn}
+                  onClick={i => this.handleClick(i)}
+                  is_mobile={is_mobile}
+                />
+              </div>
             </div>
           </div>
-        </div>
-
           <Confirm
             title={"成りますか？"}
             message={""}
@@ -1037,8 +1213,9 @@ export class Game extends React.Component<IGameProps, IGameState> {
             handleYes={() => this.handleResign(true)}
             handleNo={() => this.handleResign(false)}
           />
+          {/* ()がなかったからAlertが閉じなかった */}
           <Alert
-            title={`まで${moves}手にて${this.state.turn ? this.state.white_name : this.state.black_name}の勝ちです！`}
+            title={`まで${moves}手にて${(this.state.turn ? this.state.white_name : this.state.black_name)}の勝ちです！`}
             message={""}
             open={this.state.result}
             handleClose={this.handleResultClose}
@@ -1107,21 +1284,21 @@ export class Game extends React.Component<IGameProps, IGameState> {
             </div>
           }
           <div className="button">
-            <Button variant="contained" color="primary" size={button_size} onClick={() => this.rotate()}>
+            <Button variant="contained" color="primary" size={button_size} onClick={() => this.rotate()} >
               反転
             </Button>
           </div>
           {this.state.moves === -1 && moves_max > 0 &&
             <div className="button">
-              <Button variant="contained" color="inherit" size={button_size} onClick={() => this.setBoard(0)}>
+              <Button variant="contained" size={button_size} color="inherit" onClick={() => this.setBoard(0)}>
                 開始局面
               </Button>
             </div>
           }
           {this.state.moves === -1 && moves_max > 0 &&
             <div className="button">
-              <Button variant="contained" color="inherit" size={button_size} onClick={() => this.setBoard(moves_max)}>
-                終局面
+              <Button variant="contained" size={button_size} color="inherit" onClick={() => this.setBoard(moves_max)}>
+                終局図
               </Button>
             </div>
           }
@@ -1141,7 +1318,7 @@ export class Game extends React.Component<IGameProps, IGameState> {
           handleNo={() => this.handleResign(false)}
         />
         <Alert
-          title={`まで${moves}手にて${this.state.turn ? this.state.white_name : this.state.black_name}の勝ちです！`}
+          title={`まで${moves}手にて${(this.state.turn ? this.state.white_name : this.state.black_name)}の勝ちです！`}
           message={""}
           open={this.state.result}
           handleClose={this.handleResultClose}

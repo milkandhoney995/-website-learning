@@ -18,9 +18,9 @@ function Square(props: ISquareProps) {
   let class_string: string = ""
 
   if (props.is_captured) {
-    class_string = (props.is_mobile ? "monbile-captured" : "captured")
+    class_string = (props.is_mobile ? "mobile-captured" : "captured")
   } else {
-    class_string = (props.is_mobile ? "monbile-square piece" : "square piece")
+    class_string = (props.is_mobile ? "mobile-square piece" : "square piece")
     if (!props.is_black) class_string += " white"
   }
   if (props.is_final) class_string += " final"
@@ -80,9 +80,11 @@ export class Board extends React.Component<IBoardProps, IBoardState> {
   content(y: number) {
     let content = []
     for (let x = Setting.LENGTH - 1; x >= 0; --x) {
+      // 移動できるマス(control_piece[x][y])がある時
       if (this.props.control_piece[x][y]) {
+        console.log("移動できるマス: 横から", x, "縦から", y)
         content.push(this.renderSquare(
-          false, false, false, x * Setting.LENGTH + y + Setting.WHITE * 2
+          false, false, true, x * Setting.LENGTH + y + Setting.WHITE * 2
         ))
       }
       else if (x * Setting.LENGTH + y === this.props.final_piece - Setting.WHITE * 2) {
@@ -149,6 +151,7 @@ export class Captured extends React.Component<ICaputredProps, ICaputredState> {
         is_black={this.props.is_black}
         is_captured={true}
         can_control={false}
+        // i + 7
         onClick={(this.props.is_black ? () => this.props.onClick(i) : () => this.props.onClick(i + Setting.WHITE))}
         is_mobile={this.props.is_mobile}
       />
@@ -163,7 +166,7 @@ export class Captured extends React.Component<ICaputredProps, ICaputredState> {
     const is_black: boolean = this.props.is_black
     const turn: boolean = this.props.turn
 
-    for (let i = 0; i < Setting.WHITE; i++) {
+    for (let i = 0; i < Setting.WHITE; i++) { // 0から6まで
       let num = this.props.squares[i]
 
       if (num > 0) {
