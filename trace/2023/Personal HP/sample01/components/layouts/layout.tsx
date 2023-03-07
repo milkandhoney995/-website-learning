@@ -5,6 +5,7 @@ import { useState } from "react";
 
 type Props = {
   children: React.ReactNode;
+  title: string
 }
 
 export default function Layout({ children, ...props }: Props) {

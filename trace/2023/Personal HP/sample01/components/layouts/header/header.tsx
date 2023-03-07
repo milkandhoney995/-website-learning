@@ -3,7 +3,12 @@ import Link from "next/link";
 import profileImg from "public/images/header_mark01.svg"
 import classes from "./header.module.scss";
 
-export default function Header(props) {
+type PropsType = {
+  openMenu: boolean
+  onClick: () => void
+}
+
+export default function Header(props: PropsType) {
   return(
     <header className={classes.header}>
       <h1 className={classes.header__mark}>

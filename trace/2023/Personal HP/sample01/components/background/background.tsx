@@ -1,6 +1,10 @@
 import classes from './background.module.scss'
 
-export default function Background(props) {
+type PropsType = {
+  imageUrl: string
+}
+
+export default function Background(props: PropsType) {
   return (
     <div
       className={classes.backImage}

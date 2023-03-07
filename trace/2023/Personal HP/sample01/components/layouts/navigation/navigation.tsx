@@ -9,7 +9,11 @@ const menuList = [
   { id: 4, href: "/gallery", title: "GALLERY" },
 ];
 
-export default function Navigation(props) {
+type PeopsType = {
+  showMenu: boolean
+  onClick: () => void
+}
+export default function Navigation(props: PeopsType) {
   return(
     <nav className={`${classes.nav} ${props.showMenu ? `${classes.nav__activeNav}` : ""}`}>
       <div className={classes.nav__content}>

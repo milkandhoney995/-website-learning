@@ -1,7 +1,12 @@
 import classes from './works.module.scss'
 import Link from "next/link";
 
-export default function Works(props) {
+type PropsType = {
+  text: string
+  href: string
+}
+
+export default function Works(props: PropsType) {
   return (
     <div className={classes.works}>
       <section className={classes.works__section}>

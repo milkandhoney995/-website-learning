@@ -2,7 +2,12 @@ import classes from './article.module.scss'
 import { Background } from '../../index'
 
 
-export default function Article(props) {
+type PropsType = {
+  children: React.ReactNode;
+  imageUrl: string
+}
+
+export default function Article(props: PropsType) {
   return (
     <article>
       <Background imageUrl={props.imageUrl}></Background>

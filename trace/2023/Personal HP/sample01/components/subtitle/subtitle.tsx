@@ -1,4 +1,8 @@
 import classes from "./subtitle.module.scss";
-export default function SubTitle(props)  {
+
+type PropsType = {
+  title: string
+}
+export default function SubTitle(props: PropsType)  {
   return <h1 className={classes.subtitle}>{props.title}</h1>
 }
