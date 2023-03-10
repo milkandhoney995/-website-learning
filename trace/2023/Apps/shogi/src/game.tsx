@@ -874,23 +874,37 @@ export class Game extends React.Component<IGameProps, IGameState> {
     return
   }
 
+  // clicked_piece: 掴んでいる駒の番号
+  // turn: 先手か否か
+  // tmp_pos: 動かした後の盤面
+  // current_black_piece, current_white_piece: 相手から獲った駒の配列
+  // 初期状態： [0, 0, 0, 0, 0, 0, 0](length: 7)
+  // 例：銀桂歩4: [0, 0, 0, 1, 1, 0, 4]
+  // moves: 手数
+  // moved_piece：駒が成るマスの番号
   handlePromotion(is_promoted: boolean){
     // 正しい動きであることは保証されている
     let clicked_piece: number = this.state.clicked_piece
     const turn = this.state.turn
-    let tmp_pos = _.cloneDeep(this.state.current_pos)  // 動かした後の盤面
+    let tmp_pos = _.cloneDeep(this.state.current_pos)
     const current_black_piece = _.cloneDeep(this.state.current_black_piece)
     const current_white_piece = _.cloneDeep(this.state.current_white_piece)
     const moves = this.state.moves
+
+    // 相手から獲った駒の配列
     let tmp_black_piece = _.cloneDeep(current_black_piece)
     let tmp_white_piece = _.cloneDeep(current_white_piece)
     let xx: number = -1
     let yy: number = -1
+
+    // i: 駒が成るマスの番号
     let i = this.state.moved_piece
-    let x: number = Math.floor((i - Setting.WHITE * 2) / Setting.LENGTH)
-    let y: number = (i - Setting.WHITE * 2) % Setting.LENGTH
+    let x: number = Math.floor((i - Setting.WHITE * 2) / Setting.LENGTH) // (i - 14) /9
+    let y: number = (i - Setting.WHITE * 2) % Setting.LENGTH  // (i - 14) % 9: 余り
+
+    console.log("駒は、", i,"番目のマスでなる。座標は、", x, y, "クリックしたのは、", clicked_piece, "番目の駒。")
     // 持ち駒を掴んでいるとき
-    if (clicked_piece < Setting.WHITE * 2) {
+    if (clicked_piece < Setting.WHITE * 2) { // clicked_piece < 14
       // 先手の駒を掴んでいる場合
       if (turn) {
         // 持ち駒の更新
@@ -906,17 +920,21 @@ export class Game extends React.Component<IGameProps, IGameState> {
     }
     else {
       // 持ち駒の分を引く
-      xx = Math.floor((clicked_piece - Setting.WHITE * 2) / Setting.LENGTH) // (number - 7*2)/9
-      yy = (clicked_piece - Setting.WHITE * 2) % Setting.LENGTH // number - 7*2
+      xx = Math.floor((clicked_piece - Setting.WHITE * 2) / Setting.LENGTH) // (number - 14) /9
+      yy = (clicked_piece - Setting.WHITE * 2) % Setting.LENGTH // number - 14) % 9: 余り
       let piece = tmp_pos[x][y]
       // 盤面の更新
       tmp_pos[x][y] = tmp_pos[xx][yy]
       tmp_pos[xx][yy] = new Mt()
       // 持ち駒の更新
       let num: number = piece.piece_num()
+      console.log("座標", xx, yy, "にあった駒は、", piece.out(), "になった。", num, is_promoted)
+
+      // num !== 16
       if (num !== Setting.MT) {
-        // 成っている駒を生に戻す
+        // num > 7: 成っている駒を生に戻す
         if (num > Setting.WHITE) {
+          // num -= 8
           num -= Setting.MT / 2
         }
         turn ? ++tmp_black_piece[num] : ++tmp_white_piece[num]
@@ -924,13 +942,13 @@ export class Game extends React.Component<IGameProps, IGameState> {
     }
     if (is_promoted) tmp_pos[x][y].promote()
     let kifu = this.state.kifu
-    kifu = kifu.concat(clicked_piece)
-    kifu = kifu.concat(is_promoted ? (i + Setting.LENGTH * Setting.LENGTH) : i)
+    kifu = kifu.concat(clicked_piece) // クリックした駒の番号
+    kifu = kifu.concat(is_promoted ? (i + Setting.LENGTH * Setting.LENGTH) : i) // i(駒が成るマスの番号) + 9×9、またはi
     this.setState({
       current_pos: tmp_pos,
-      current_black_piece: tmp_black_piece,
+      current_black_piece: tmp_black_piece, // 相手から獲った駒の配列
       current_white_piece: tmp_white_piece,
-      control_piece: set_control_piece(),
+      control_piece: set_control_piece(), //駒が動ける位置
       kifu: kifu,
       turn: !turn,
       moves: moves + 1,
