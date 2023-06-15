@@ -2,10 +2,12 @@
 web制作・webアプリ開発実務のために勉強したものの備忘録
 
 # ディレクトリ
-## trace
+### learning
+JavaScript, CSS/SCSSの勉強用
+### trace
 webサイトコーディング練習用
 
-## テスト
+### テスト
 勉強記録用
 - TypeScriptの勉強
 - React チュートリアル
