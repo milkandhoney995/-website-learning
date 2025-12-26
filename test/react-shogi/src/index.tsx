@@ -7,7 +7,6 @@ const root = ReactDOM.createRoot(document.getElementById("root")!);
 root.render(
   <Game
     start_pos={makePieces()}
-    squares={Array(9).fill("")}
   />
 );
 

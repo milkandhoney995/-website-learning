@@ -21,18 +21,18 @@ function Square(props: SquarePropsInterface) {
 }
 
 interface BoardPropsInterface {
-  squares: Array<string> // 元はArray<string>
+  pieces: Piece[][]
   onClick: (i: number) => void
 }
 interface BoardStateInterface {
-  squares: Array<string> // 元はArray<string>
+  pieces: Piece[][]
   xIsNext: boolean
 }
 class Board extends React.Component<BoardPropsInterface, BoardStateInterface> {
   renderSquare(i: number) {
     return (
       <Square
-        value={this.props.squares[i]}
+        value={this.props.pieces[Math.floor(i/9)][i%9].showName()}
         onClick={() => this.props.onClick(i)} />
     )
   }
@@ -46,8 +46,12 @@ class Board extends React.Component<BoardPropsInterface, BoardStateInterface> {
 
   render() {
     let items = []
-    for (let i = 0; i < 9; i=i+3) {
-      items.push(<div className="board-row" key={i}>{this.Content(i)}</div>)
+    for (let i = 0; i < 81; i += 9) {
+      let content = []
+      for (let j = i; j < i + 9; j++) {
+        content.push(this.renderSquare(j))
+      }
+      items.push(<div className="board-row" key={i}>{content}</div>)
     }
     return (
       <div >

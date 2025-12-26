@@ -1,14 +1,25 @@
 import React from 'react';
-import { Piece, Blank, Osho, Fu, Gin, Kin, Kyosha, Kaku, Hisha, Keima } from './Pieces'
+import { Piece, Blank, Osho, Fu, Gin, Kin, Kyosha, Kaku, Hisha, Keima, Position } from './Pieces'
 import { Board, Stand } from './BoardInfo';
 import { Setting } from '../setting';
 
+interface GamePropsInterface {
+  start_pos: Piece[][]
+}
+interface GameStateInterface {
+  pieces: Piece[][]
+  history: Array<{ pieces: Piece[][] }>
+  xIsNext: boolean
+  stepNumber: number
+  selected: number | null
+  possibleMoves: number[]
+}
 
 export function makePieces(sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1", language='Ja') {
-  let pieces: Piece[][] = []
+  let pieces: Piece[][] = Array.from({length: 9}, () => Array(9).fill(null));
 
   if (sfen === "lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1/LNSGKGSNL b - 1") {
-    // 1段目
+    // 1段目 (9th rank for second player, but in array 0 is 1st rank)
     pieces[0] = [
       new Kyosha('first', 1, 1),
       new Keima('first', 2, 1),
@@ -32,17 +43,19 @@ export function makePieces(sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1
       new Hisha('first', 8, 2),
       new Blank('first', 9, 2),
     ]
-     // 3段目と7段目
+     // 3段目
     for (let i = 0; i < Setting.LENGTH; i++) {
-      pieces[2][i] = new Fu('first', 1 + i, 3)
-      pieces[6][i] = new Fu('second', 1 + i, 7)
+      pieces[2][i] = new Fu('first', i+1, 3)
     }
-
-    // 4~6段目
+    // 4-6段目 blank
+    for (let rank = 3; rank <= 5; rank++) {
+      for (let i = 0; i < Setting.LENGTH; i++) {
+        pieces[rank][i] = new Blank('first', i+1, rank+1)
+      }
+    }
+    // 7段目
     for (let i = 0; i < Setting.LENGTH; i++) {
-      pieces[3][i] = new Fu('first', 1 + i, 4)
-      pieces[4][i] = new Fu('second', 1 + i, 5)
-      pieces[5][i] = new Fu('second', 1 + i, 6)
+      pieces[6][i] = new Fu('second', i+1, 7)
     }
     // 8段目
     pieces[7] = [
@@ -73,57 +86,64 @@ export function makePieces(sfen="lnsgkgsnl/1r5b1/ppppppppp/9/9/9/PPPPPPPPP/1B5R1
   return pieces
 }
 
-interface GamePropsInterface {
-  start_pos: Piece[][]
-  squares: Array<string>
-}
-interface GameStateInterface {
-  start_pos: Piece[][]
-  history: Array<{ [field: string]: string[]}>
-  xIsNext: boolean
-  stepNumber: number
-}
-
 class Game extends React.Component<GamePropsInterface, GameStateInterface> {
   constructor(props: GamePropsInterface) {
     super(props)
     this.state = {
-      start_pos: this.props.start_pos,
+      pieces: this.props.start_pos,
       history: [{
-        squares: Array(9).fill("")
+        pieces: this.props.start_pos
       }],
       xIsNext: true,
-      stepNumber: 0
+      stepNumber: 0,
+      selected: null,
+      possibleMoves: []
     }
   }
+
   handleClick(i: number) {
-    // 「時間の巻き戻し」をした時点で新しい着手を起こした場合に、もはや正しくなくなった履歴を確実に捨て去る
-    const history = this.state.history.slice(0, this.state.stepNumber + 1)
-    const current = history[history.length - 1]
-    const squares: Array<string> = current.squares.slice()
-    if (calculateWinner(squares) || squares[i]) return
-    squares[i] = this.state.xIsNext ? 'X' : '0'
-    this.setState({
-      history: history.concat([{
-        squares: squares
-      }]),
-      xIsNext: !this.state.xIsNext,
-      // 新しい着手が発生した場合、stepNumber を更新する
-      stepNumber: history.length
-    })
+    if (this.state.selected === null) {
+      const piece = this.state.pieces[Math.floor(i/9)][i%9]
+      if (piece.showName() && ((this.state.xIsNext && piece.getPlayer() === 'first') || (!this.state.xIsNext && piece.getPlayer() === 'second'))) {
+        this.setState({selected: i, possibleMoves: this.getPossibleMoves(i)})
+      }
+    } else {
+      if (this.state.possibleMoves.includes(i)) {
+        const newPieces = this.state.pieces
+        const fromRank = Math.floor(this.state.selected / 9)
+        const fromFile = this.state.selected % 9
+        const toRank = Math.floor(i / 9)
+        const toFile = i % 9
+        newPieces[toRank][toFile] = newPieces[fromRank][fromFile]
+        newPieces[toRank][toFile].position = new Position(toFile + 1, toRank + 1)
+        newPieces[fromRank][fromFile] = new Blank('first', fromFile + 1, fromRank + 1)
+        const history = this.state.history.slice(0, this.state.stepNumber + 1)
+        this.setState({
+          pieces: newPieces,
+          history: history.concat([{pieces: newPieces}]),
+          xIsNext: !this.state.xIsNext,
+          stepNumber: history.length,
+          selected: null,
+          possibleMoves: []
+        })
+      } else {
+        this.setState({selected: null, possibleMoves: []})
+      }
+    }
   }
 
   jumpTo(step: number) {
     this.setState({
       stepNumber: step,
-      xIsNext: (step % 2) === 0
+      xIsNext: (step % 2) === 0,
+      selected: null,
+      possibleMoves: []
     })
   }
 
   render() {
     const history = this.state.history
     const current = history[this.state.stepNumber]
-    const winner = calculateWinner(current.squares);
 
     const moves = history.map((step, move) => {
       const desc = move ?
@@ -136,23 +156,18 @@ class Game extends React.Component<GamePropsInterface, GameStateInterface> {
       )
     })
 
-    let status;
-    if (winner) {
-      status = 'Winner: ' + winner;
-    } else {
-      status = 'Next player: ' + (this.state.xIsNext ? 'X' : '0');
-    }
+    let status = 'Next player: ' + (this.state.xIsNext ? '先手' : '後手');
     return (
       <div className="game">
         <div className="game-stand">
           <Stand
-            squares={current.squares}
-            onClick={(i) => this.handleClick(i)}
+            squares={Array(9).fill("")}
+            onClick={() => {}}
           />
         </div>
         <div className="game-board">
           <Board
-            squares={current.squares}
+            pieces={current.pieces}
             onClick={(i) => this.handleClick(i)}
           />
         </div>
@@ -163,26 +178,21 @@ class Game extends React.Component<GamePropsInterface, GameStateInterface> {
       </div>
     );
   }
-}
 
-function calculateWinner(squares: Array<string>): string {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6],
-  ];
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+  getPossibleMoves(i: number): number[] {
+    const piece = this.state.pieces[Math.floor(i/9)][i%9]
+    let moves: number[] = []
+    for (let r = 0; r < 9; r++) {
+      for (let f = 0; f < 9; f++) {
+        if (r === Math.floor(i/9) && f === i%9) continue
+        const pos = new Position(f + 1, r + 1)
+        if (piece.canMoveTo(pos, piece.getPlayer()) && this.state.pieces[r][f].showName() === '') {
+          moves.push(r * 9 + f)
+        }
+      }
     }
+    return moves
   }
-  return "";
 }
 
 export { Game };

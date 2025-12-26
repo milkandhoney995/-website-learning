@@ -29,7 +29,7 @@ class Position {
 }
 
 abstract class Piece {
-  protected position: Position
+  public position: Position
   // 駒の名前
   private name: string;
 
@@ -46,6 +46,9 @@ abstract class Piece {
 
   public showName(): string {
     return this.name
+  }
+  public getPlayer(): Player {
+    return this.player
   }
   public showPosition(): Position{
     return this.position
@@ -241,4 +244,4 @@ class Narigin extends Gin {}
 class Kei extends Keima {} // 圭
 class Narikyo extends Kyosha {} // 成香
 
-export { Piece, Blank, Osho, Hisha, Kaku, Kin, Gin, Keima, Kyosha, Fu, Ryu, Uma, Narikin, Narigin, Kei, Narikyo };
+export { Piece, Blank, Osho, Hisha, Kaku, Kin, Gin, Keima, Kyosha, Fu, Ryu, Uma, Narikin, Narigin, Kei, Narikyo, Position };
